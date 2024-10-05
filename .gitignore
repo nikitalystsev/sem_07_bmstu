@@ -1,3 +1,9 @@
 testing/gitlab_testing/
 web/.git
 web/web_gitlab/
+
+info_sec/labs/lab_*/.idea/
+info_sec/labs/lab_*/CMakeLists.txt
+info_sec/labs/lab_*/cmake-build-debug/
+info_sec/labs/lab_*/condition/
+info_sec/labs/lab_*/report/
