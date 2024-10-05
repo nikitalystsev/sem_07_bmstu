@@ -1,0 +1,22 @@
+uint8_t Enigma::encrypt(uint8_t symbol, bool &isValid) {
+    uint8_t symbolCode = this->encoder.encode(symbol, isValid);
+    if (!isValid) {
+        cout << "no encode" << endl;
+        return 0;
+    }
+    isValid = false;
+    uint8_t encryptSymbolCode = this->encryptCharByCode(symbolCode, isValid);
+    if (!isValid) {
+        cout << "no encrypt" << endl;
+        return 0;
+    }
+    isValid = false;
+    uint8_t encryptSymbol = this->encoder.decode(encryptSymbolCode, isValid);
+    if (!isValid) {
+        cout << "no decode" << endl;
+        return 0;
+    }
+
+    isValid = true;
+    return encryptSymbol;
+}
