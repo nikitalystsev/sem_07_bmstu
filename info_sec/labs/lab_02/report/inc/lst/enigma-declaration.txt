@@ -1,0 +1,31 @@
+class Enigma {
+private:
+    int counter = 0; 
+    int sizeRotor; 
+    int numRotors; 
+    vector<uint8_t> reflector; 
+    vector<uint8_t> 
+    vector<vector<uint8_t>> rotors; 
+    Encoder encoder; 
+
+    uint8_t getIndexByValueInRotor(int numRotor, uint8_t code, bool &isFind);
+
+    void rotorRotate(int numRotor); 
+
+    uint8_t encrypt(uint8_t code, bool &isValid);
+
+public:
+    Enigma(const vector<uint8_t> &alph, int numRotors);
+
+    void setReflector(vector<uint8_t> &newReflector);
+
+    void setCommutator(vector<uint8_t> &newCommutator);
+
+    void setRotors(vector<vector<uint8_t>> &newRotors);
+
+    uint8_t encryptCharByCode(uint8_t code, bool &isEncrypt);
+
+    string encryptString(const string &str);
+
+    void encryptFile(const string &filepath, const string &outputFilepath);
+};

@@ -1,0 +1,46 @@
+% $ biblatex auxiliary file $
+% $ biblatex bbl format version 3.2 $
+% Do not modify the above lines!
+%
+% This is an auxiliary file used by the 'biblatex' package.
+% This file may safely be deleted. It will be recreated by
+% biber as required.
+%
+\begingroup
+\makeatletter
+\@ifundefined{ver@biblatex.sty}
+  {\@latex@error
+     {Missing 'biblatex' package}
+     {The bibliography requires the 'biblatex' package.}
+      \aftergroup\endinput}
+  {}
+\endgroup
+
+
+\refsection{0}
+  \datalist[entry]{none/global//global/global}
+    \entry{info_Enigma1}{misc}{}
+      \field{sortinit}{1}
+      \field{sortinithash}{4f6aaa89bab872aa0999fec09ff8e98a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://cyberleninka.ru/article/n/algoritm-perenosnoy-shifrovalnoy-mashiny-enigma/viewer} (дата обращения: 04.10.2024).}
+      \field{title}{Алгоритм переносной шифровальной машины Энигма [Электронный ресурс].}
+    \endentry
+    \entry{info_Enigma2}{misc}{}
+      \field{sortinit}{2}
+      \field{sortinithash}{8b555b3791beccb63322c22f3320aa9a}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://habr.com/ru/articles/721790/} (дата обращения: 04.10.2024).}
+      \field{title}{Программная реализация шифровальной машины «Энигма» на языке Си [Электронный ресурс].}
+    \endentry
+    \entry{pl}{misc}{}
+      \field{sortinit}{3}
+      \field{sortinithash}{ad6fe7482ffbd7b9f99c9e8b5dccd3d7}
+      \field{labeltitlesource}{title}
+      \field{howpublished}{Режим доступа: \url{https://learn.microsoft.com/ru-ru/cpp/cpp/cpp-language-reference?view=msvc-170} (дата обращения: 28.09.2022).}
+      \field{title}{Справочник по языку C++ [Электронный ресурс].}
+    \endentry
+  \enddatalist
+\endrefsection
+\endinput
+
