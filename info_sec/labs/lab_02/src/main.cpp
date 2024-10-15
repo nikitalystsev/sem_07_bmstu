@@ -2,6 +2,7 @@
 // Created by nikitalystsev on 05.10.2024.
 //
 
+#include <iostream>
 #include "DES.h"
 
 /*
@@ -17,4 +18,8 @@
 
 
 int main() {
+    std::vector<int> initVector = {1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1};
+
+    std::cout << initVector.size() << std::endl;
+
 }
