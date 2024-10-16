@@ -9,6 +9,8 @@
 #include <bitset>
 #include <algorithm>
 #include <utility>
+#include <fstream>
+#include <filesystem>
 #include "DES.h"
 
 using namespace std;
@@ -18,7 +20,12 @@ public:
     PCBC(DES des, bitset<64> &iv);
 
     string encryptString(const string &str, const string &key);
+
     string decryptString(const string &str, const string &key);
+
+    void encryptFile(const string &filepath, const string &outFilepath, const string &key);
+
+    void decryptFile(const string &filepath, const string &outFilepath, const string &key);
 
 private:
     static bitset<64> _vCharToBitset64(vector<char> value);
@@ -27,7 +34,10 @@ private:
 
     static vector<bitset<64>> _getVBitset64FromVChar(const vector<char> &value);
 
+    vector<char> _getCharBytesFromFile(const string &filepath);
+
     vector<char> _encrypt(vector<bitset<64>> &strBlocks, bitset<64> &bitsetKey);
+
     vector<char> _decrypt(vector<bitset<64>> &strBlocks, bitset<64> &bitsetKey);
 
     DES _des;

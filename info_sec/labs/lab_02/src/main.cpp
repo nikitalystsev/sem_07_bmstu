@@ -7,6 +7,7 @@
 #include "PCBC.h"
 
 using namespace std;
+
 /*
  * Реализовать программу шифрования симметричным алгоритмом DES с
  * применением одного из режимов шифрования (по варианту).
@@ -25,15 +26,30 @@ int main() {
 
     PCBC pcbc(des, iv);
 
+    /*
+     * текстовые сообщения
+     */
+    string keyForStr = "key12345";
     string message = "Hello";
 
     cout << "message: " << message << endl;
 
-    string encryptMessage = pcbc.encryptString(message, "key12345");
+    string encryptMessage = pcbc.encryptString(message, keyForStr);
 
     cout << "encryptMessage: " << encryptMessage << endl;
 
-    string decryptMessage = pcbc.decryptString(encryptMessage, "key12345");
+    string decryptMessage = pcbc.decryptString(encryptMessage, keyForStr);
 
     cout << "decryptMessage: " << decryptMessage << endl;
+
+    /*
+     * произвольные файлы
+     */
+    string keyForFiles = "key12345";
+    string filepath = "../data/test.txt";
+    string encryptFilepath = "../data/encrypt_test.txt";
+    string decryptFilepath = "../data/decrypt_test.txt";
+
+    pcbc.encryptFile(filepath, encryptFilepath, keyForFiles);
+    pcbc.decryptFile(encryptFilepath, decryptFilepath, keyForFiles);
 }

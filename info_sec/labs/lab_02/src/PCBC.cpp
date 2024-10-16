@@ -4,8 +4,6 @@
 
 #include "PCBC.h"
 
-#include <utility>
-#include "DES.h"
 
 PCBC::PCBC(DES des, bitset<64> &iv) : _des(std::move(des)), _iv(iv) {
 
@@ -33,6 +31,50 @@ string PCBC::decryptString(const string &str, const string &key) {
     vector<char> encryptedStr = this->_decrypt(strBlocks, bitsetKey);
 
     return string{encryptedStr.begin(), encryptedStr.end()};
+}
+
+void PCBC::encryptFile(const string &filepath, const string &outFilepath, const string &key) {
+    ofstream outputFile(outFilepath, ios::binary);
+    if (!outputFile.is_open()) {
+        cout << "out file dont open" << endl;
+        return;
+    }
+
+    vector<char> data = this->_getCharBytesFromFile(filepath);
+    vector<char> vCharKey(key.begin(), key.end());
+
+    vector<bitset<64>> binData = PCBC::_getVBitset64FromVChar(data);
+    bitset<64> bitsetKey = PCBC::_vCharToBitset64(vCharKey);
+
+    vector<char> encryptedData = this->_encrypt(binData, bitsetKey);
+
+    for (auto encByte: encryptedData) {
+        outputFile.write(&encByte, sizeof(encByte));
+    }
+
+    outputFile.close();
+}
+
+void PCBC::decryptFile(const string &filepath, const string &outFilepath, const string &key) {
+    ofstream outputFile(outFilepath, ios::binary);
+    if (!outputFile.is_open()) {
+        cout << "out file dont open" << endl;
+        return;
+    }
+
+    vector<char> data = this->_getCharBytesFromFile(filepath);
+    vector<char> vCharKey(key.begin(), key.end());
+
+    vector<bitset<64>> binData = PCBC::_getVBitset64FromVChar(data);
+    bitset<64> bitsetKey = PCBC::_vCharToBitset64(vCharKey);
+
+    vector<char> encryptedData = this->_decrypt(binData, bitsetKey);
+
+    for (auto encByte: encryptedData) {
+        outputFile.write(&encByte, sizeof(encByte));
+    }
+
+    outputFile.close();
 }
 
 bitset<64> PCBC::_vCharToBitset64(vector<char> value) {
@@ -137,3 +179,28 @@ vector<char> PCBC::_decrypt(vector<bitset<64>> &strBlocks, bitset<64> &bitsetKey
     return decryptedStr;
 }
 
+vector<char> PCBC::_getCharBytesFromFile(const string &filepath) {
+    vector<char> result;
+
+    ifstream file(filepath, ios::binary);
+    if (!file.is_open()) {
+        cout << "file dont open" << endl;
+        return {};
+    }
+
+    size_t filesize = filesystem::file_size(filepath);
+    size_t currByte = 0;
+
+    while (currByte != filesize) {
+        char byte;
+        file.read(&byte, sizeof(byte));
+
+        result.push_back(byte);
+
+        currByte++;
+    }
+
+    file.close();
+
+    return result;
+}
