@@ -10,6 +10,7 @@ PCBC::PCBC(DES des, bitset<64> &iv) : _des(std::move(des)), _iv(iv) {
 }
 
 string PCBC::encryptString(const string &str, const string &key) {
+    this->_diffSize = 0;
     vector<char> vCharStr(str.begin(), str.end());
     vector<char> vCharKey(key.begin(), key.end());
 
@@ -34,6 +35,7 @@ string PCBC::decryptString(const string &str, const string &key) {
 }
 
 void PCBC::encryptFile(const string &filepath, const string &outFilepath, const string &key) {
+    this->_diffSize = 0;
     ofstream outputFile(outFilepath, ios::binary);
     if (!outputFile.is_open()) {
         cout << "out file dont open" << endl;
@@ -128,6 +130,7 @@ vector<bitset<64>> PCBC::_getVBitset64FromVChar(const vector<char> &value) {
     if (!buffer.empty() && buffer.size() < 8) {
         while (buffer.size() < 8) {
             buffer.push_back((char) 0);
+            this->_diffSize++;
         }
 
         result.push_back(PCBC::_vCharToBitset64(buffer));
@@ -174,6 +177,16 @@ vector<char> PCBC::_decrypt(vector<bitset<64>> &strBlocks, bitset<64> &bitsetKey
         }
 
         Ci_minus_1 = tmp ^ strBlock;
+    }
+
+    cout << "diffSize = " << this->_diffSize << endl;
+
+    if (this->_diffSize == 0) {
+        return decryptedStr;
+    }
+
+    for (int i = 0; i < this->_diffSize; i++) {
+        decryptedStr.pop_back();
     }
 
     return decryptedStr;

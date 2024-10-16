@@ -29,18 +29,18 @@ int main() {
     /*
      * текстовые сообщения
      */
-    string keyForStr = "key12345";
-    string message = "Hello";
-
-    cout << "message: " << message << endl;
-
-    string encryptMessage = pcbc.encryptString(message, keyForStr);
-
-    cout << "encryptMessage: " << encryptMessage << endl;
-
-    string decryptMessage = pcbc.decryptString(encryptMessage, keyForStr);
-
-    cout << "decryptMessage: " << decryptMessage << endl;
+//    string keyForStr = "key12345";
+//    string message = "Hello";
+//
+//    cout << "message: " << message << endl;
+//
+//    string encryptMessage = pcbc.encryptString(message, keyForStr);
+//
+//    cout << "encryptMessage: " << encryptMessage << endl;
+//
+//    string decryptMessage = pcbc.decryptString(encryptMessage, keyForStr);
+//
+//    cout << "decryptMessage: " << decryptMessage << endl;
 
     /*
      * произвольные файлы

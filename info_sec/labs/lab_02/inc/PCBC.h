@@ -32,7 +32,7 @@ private:
 
     static vector<char> _bitset64ToVChar(bitset<64> value);
 
-    static vector<bitset<64>> _getVBitset64FromVChar(const vector<char> &value);
+    vector<bitset<64>> _getVBitset64FromVChar(const vector<char> &value);
 
     vector<char> _getCharBytesFromFile(const string &filepath);
 
@@ -42,6 +42,7 @@ private:
 
     DES _des;
     const bitset<64> _iv;
+    int _diffSize = 0; // сколько байт добавили в последнем шифруемом блоке (если он не полный)
 };
 
 
