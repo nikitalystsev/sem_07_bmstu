@@ -1,0 +1,11 @@
+bitset<32> DES::_f(bitset<32> Ri_minus_1, bitset<48> ki) {
+    bitset<48> extendRi_minus_1 = this->_applyE(Ri_minus_1);
+    bitset<48> xorRi_minus_1 = extendRi_minus_1 ^ ki;
+
+    bitset<6> tmp = {};
+    bitset<32> result = {};
+
+    int k = 0;
+    for (int i = 0; i < 8; i++) {
+        for (int j = 0; j < 6; j++) {
+            tmp[j] = xorRi_minus_1[i * 6 + j];

@@ -29,27 +29,27 @@ int main() {
     /*
      * текстовые сообщения
      */
-//    string keyForStr = "key12345";
-//    string message = "Hello";
-//
-//    cout << "message: " << message << endl;
-//
-//    string encryptMessage = pcbc.encryptString(message, keyForStr);
-//
-//    cout << "encryptMessage: " << encryptMessage << endl;
-//
-//    string decryptMessage = pcbc.decryptString(encryptMessage, keyForStr);
-//
-//    cout << "decryptMessage: " << decryptMessage << endl;
+    string keyForStr = "key12345";
+    string message = "B";
+
+    cout << "message: " << message << endl;
+
+    string encryptMessage = pcbc.encryptString(message, keyForStr);
+
+    cout << "encryptMessage: " << encryptMessage << endl;
+
+    string decryptMessage = pcbc.decryptString(encryptMessage, keyForStr);
+
+    cout << "decryptMessage: " << decryptMessage << endl;
 
     /*
      * произвольные файлы
      */
-    string keyForFiles = "key12345";
-    string filepath = "../data/test.txt";
-    string encryptFilepath = "../data/encrypt_test.txt";
-    string decryptFilepath = "../data/decrypt_test.txt";
-
-    pcbc.encryptFile(filepath, encryptFilepath, keyForFiles);
-    pcbc.decryptFile(encryptFilepath, decryptFilepath, keyForFiles);
+//    string keyForFiles = "key12345";
+//    string filepath = "../data/test.txt";
+//    string encryptFilepath = "../data/encrypt_test.txt";
+//    string decryptFilepath = "../data/decrypt_test.txt";
+//
+//    pcbc.encryptFile(filepath, encryptFilepath, keyForFiles);
+//    pcbc.decryptFile(encryptFilepath, decryptFilepath, keyForFiles);
 }

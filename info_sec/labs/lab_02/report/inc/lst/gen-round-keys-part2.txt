@@ -1,0 +1,17 @@
+		auto [C0, D0] = DES::_p1KeyToC0D0(tmp);
+		
+		C0 = DES::_applyCycleLeftShift(C0, cntBitsForShift);
+        D0 = DES::_applyCycleLeftShift(D0, cntBitsForShift);
+
+        for (int i = 0; i < 28; i++) {
+            P1Key[i] = C0[i];
+            P1Key[i + 27] = D0[i];
+        }
+
+        bitset<48> P2Key = this->_applyP2Ki(P1Key);
+
+        keys.push_back(P2Key);
+    }
+
+    return keys;
+}

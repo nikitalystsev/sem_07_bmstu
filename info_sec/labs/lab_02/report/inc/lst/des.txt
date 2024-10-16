@@ -1,0 +1,15 @@
+bitset<64> DES::encryptBlock(bitset<64> block, bitset<64> key) {
+    bitset<64> IPBlock = this->_applyIP(block);
+
+    vector<bitset<48>> roundKeys = this->_genRoundKeys(key);
+	
+    auto [Li, Ri] = DES::_iPBlockToL0R0(IPBlock);
+
+    for (auto roundKey: roundKeys) {
+        pair<bitset<32>, bitset<32>> value = this->_roundEncrypt(Li, Ri, roundKey);
+        Li = value.first;
+        Ri = value.second;
+    }
+
+    return this->_applyIpInv(Li, Ri);
+}

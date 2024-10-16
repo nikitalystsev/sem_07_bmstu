@@ -1,9 +1,0 @@
-string Enigma::encryptString(const string &str) {
-    std::string encryptStr;
-
-    for (uint8_t symbol: str) {
-        bool isValid = false;
-
-        char encryptSymbol = static_cast<char>(this->encrypt(symbol, isValid));
-        if (!isValid) {
-            encryptStr += static_cast<char>(symbol);
