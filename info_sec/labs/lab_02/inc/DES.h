@@ -8,6 +8,9 @@
 #include <bitset>
 #include <array>
 #include <vector>
+#include <algorithm>
+#include <utility>
+#include <iostream>
 
 using namespace std;
 
@@ -126,10 +129,12 @@ private:
     // end функции генерации ключей раундов
 
     vector<bitset<48>> _genRoundKeys(bitset<64> key);
+    vector<bitset<48>> _genRoundKeysForDecrypt(bitset<64> key);
 
     static pair<bitset<32>, bitset<32>> _iPBlockToL0R0(bitset<64> iPBlock);
 
-    pair<bitset<32>, bitset<32>> _round(bitset<32> Li_minus_1, bitset<32> Ri_minus_1, bitset<48> ki);
+    pair<bitset<32>, bitset<32>> _roundEncrypt(bitset<32> Li_minus_1, bitset<32> Ri_minus_1, bitset<48> ki);
+    pair<bitset<32>, bitset<32>> _roundDecrypt(bitset<32> Li, bitset<32> Ri, bitset<48> ki);
 
     bitset<32> _f(bitset<32> Ri_minus_1, bitset<48> ki); // функция Фейстеля
 
@@ -144,6 +149,7 @@ public:
     DES() = default;
 
     bitset<64> encryptBlock(bitset<64> block, bitset<64> key);
+    bitset<64> decryptBlock(bitset<64> block, bitset<64> key);
 };
 
 

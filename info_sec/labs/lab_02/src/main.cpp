@@ -4,7 +4,9 @@
 
 #include <iostream>
 #include "DES.h"
+#include "PCBC.h"
 
+using namespace std;
 /*
  * Реализовать программу шифрования симметричным алгоритмом DES с
  * применением одного из режимов шифрования (по варианту).
@@ -18,8 +20,20 @@
 
 
 int main() {
-    std::vector<int> initVector = {1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 1, 1, 1, 0, 1, 0, 1, 1, 0, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1, 0, 1, 1};
+    DES des;
+    bitset<64> iv("1100101001110110111101110001110101101011001001010110001101111111");
 
-    std::cout << initVector.size() << std::endl;
+    PCBC pcbc(des, iv);
 
+    string message = "Hello";
+
+    cout << "message: " << message << endl;
+
+    string encryptMessage = pcbc.encryptString(message, "key12345");
+
+    cout << "encryptMessage: " << encryptMessage << endl;
+
+    string decryptMessage = pcbc.decryptString(encryptMessage, "key12345");
+
+    cout << "decryptMessage: " << decryptMessage << endl;
 }

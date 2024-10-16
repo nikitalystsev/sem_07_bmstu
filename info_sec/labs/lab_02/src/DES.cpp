@@ -17,7 +17,7 @@ bitset<64> DES::encryptBlock(bitset<64> block, bitset<64> key) {
 
     // 16 раундов шифрования
     for (auto roundKey: roundKeys) {
-        pair<bitset<32>, bitset<32>> value = this->_round(Li, Ri, roundKey);
+        pair<bitset<32>, bitset<32>> value = this->_roundEncrypt(Li, Ri, roundKey);
         Li = value.first;
         Ri = value.second;
     }
@@ -25,6 +25,28 @@ bitset<64> DES::encryptBlock(bitset<64> block, bitset<64> key) {
     // применение конечной перестановки
     return this->_applyIpInv(Li, Ri);
 }
+
+bitset<64> DES::decryptBlock(bitset<64> block, bitset<64> key) {
+    // применение начальной перестановки (такая же)
+    bitset<64> IPBlock = this->_applyIP(block);
+
+    // генерация ключей шифрования для каждого раунда (реверс)
+    vector<bitset<48>> roundKeys = this->_genRoundKeysForDecrypt(key);
+
+    // разбиение блока на 2 части -- L_16 и R_16
+    auto [Li, Ri] = DES::_iPBlockToL0R0(IPBlock);
+
+    // 16 раундов шифрования
+    for (auto roundKey: roundKeys) {
+        pair<bitset<32>, bitset<32>> value = this->_roundDecrypt(Li, Ri, roundKey);
+        Li = value.first;
+        Ri = value.second;
+    }
+
+    // применение конечной перестановки
+    return this->_applyIpInv(Li, Ri);
+}
+
 
 bitset<64> DES::_applyIP(bitset<64> block) {
     bitset<64> newBlock;
@@ -127,11 +149,19 @@ pair<bitset<32>, bitset<32>> DES::_iPBlockToL0R0(bitset<64> iPBlock) {
     return pair<bitset<32>, bitset<32>>{L0, R0};
 }
 
-pair<bitset<32>, bitset<32>> DES::_round(bitset<32> Li_minus_1, bitset<32> Ri_minus_1, bitset<48> ki) {
+pair<bitset<32>, bitset<32>> DES::_roundEncrypt(bitset<32> Li_minus_1, bitset<32> Ri_minus_1, bitset<48> ki) {
     bitset<32> Li = Ri_minus_1;
     bitset<32> Ri = Li_minus_1 ^ this->_f(Ri_minus_1, ki);
 
     return pair<bitset<32>, bitset<32>>{Li, Ri};
+}
+
+
+pair<bitset<32>, bitset<32>> DES::_roundDecrypt(bitset<32> Li, bitset<32> Ri, bitset<48> ki) {
+    bitset<32> Ri_minus_1 = Li;
+    bitset<32> Li_minus_1 = Ri ^ this->_f(Li, ki);
+
+    return pair<bitset<32>, bitset<32>>{Li_minus_1, Ri_minus_1};
 }
 
 bitset<32> DES::_f(bitset<32> Ri_minus_1, bitset<48> ki) {
@@ -204,19 +234,27 @@ bitset<32> DES::_applyP(bitset<32> value) {
 }
 
 bitset<64> DES::_applyIpInv(bitset<32> Li, bitset<32> Ri) {
-    bitset<64> tmpRes = {};
+    bitset<64> tmpRes;
 
     for (int i = 0; i < 32; i++) {
-        tmpRes[i] = Li[i];
-        tmpRes[i + 32] = Ri[i];
+        tmpRes[i] = Ri[i];
+        tmpRes[i + 32] = Li[i];
     }
 
     int i = 0;
-    bitset<64> result = {};
+    bitset<64> result;
     for (auto index: this->_ipInv) {
         result[i] = tmpRes[index - 1];
         i++;
     }
 
     return result;
+}
+
+vector<bitset<48>> DES::_genRoundKeysForDecrypt(bitset<64> key) {
+    vector<bitset<48>> roundKeys = this->_genRoundKeys(key);
+
+    reverse(roundKeys.begin(), roundKeys.end());
+
+    return roundKeys;
 }
