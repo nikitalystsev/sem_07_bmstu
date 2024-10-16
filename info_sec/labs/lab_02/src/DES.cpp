@@ -27,10 +27,10 @@ bitset<64> DES::encryptBlock(bitset<64> block, bitset<64> key) {
 }
 
 bitset<64> DES::decryptBlock(bitset<64> block, bitset<64> key) {
-    // применение начальной перестановки (такая же)
+    // применение начальной перестановки
     bitset<64> IPBlock = this->_applyIP(block);
 
-    // генерация ключей шифрования для каждого раунда (реверс)
+    // генерация ключей шифрования для каждого раунда
     vector<bitset<48>> roundKeys = this->_genRoundKeysForDecrypt(key);
 
     // разбиение блока на 2 части -- L_16 и R_16
@@ -38,7 +38,8 @@ bitset<64> DES::decryptBlock(bitset<64> block, bitset<64> key) {
 
     // 16 раундов шифрования
     for (auto roundKey: roundKeys) {
-        pair<bitset<32>, bitset<32>> value = this->_roundDecrypt(Li, Ri, roundKey);
+        // тоже _roundEncrypt
+        pair<bitset<32>, bitset<32>> value = this->_roundEncrypt(Li, Ri, roundKey);
         Li = value.first;
         Ri = value.second;
     }
@@ -138,8 +139,7 @@ bitset<28> DES::_applyCycleLeftShift(bitset<28> value, int cntBitsForShift) {
 }
 
 pair<bitset<32>, bitset<32>> DES::_iPBlockToL0R0(bitset<64> iPBlock) {
-    bitset<32> L0 = {};
-    bitset<32> R0 = {};
+    bitset<32> L0, R0;
 
     for (int i = 0; i < 32; i++) {
         L0[i] = iPBlock[i];
@@ -250,6 +250,7 @@ bitset<64> DES::_applyIpInv(bitset<32> Li, bitset<32> Ri) {
 
     return result;
 }
+
 
 vector<bitset<48>> DES::_genRoundKeysForDecrypt(bitset<64> key) {
     vector<bitset<48>> roundKeys = this->_genRoundKeys(key);

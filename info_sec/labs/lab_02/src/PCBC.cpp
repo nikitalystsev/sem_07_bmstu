@@ -3,9 +3,11 @@
 //
 
 #include "PCBC.h"
+
+#include <utility>
 #include "DES.h"
 
-PCBC::PCBC(DES des, bitset<64> &iv) : _des(des), _iv(iv) {
+PCBC::PCBC(DES des, bitset<64> &iv) : _des(std::move(des)), _iv(iv) {
 
 }
 
