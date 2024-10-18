@@ -134,7 +134,6 @@ private:
     static pair<bitset<32>, bitset<32>> _iPBlockToL0R0(bitset<64> iPBlock);
 
     pair<bitset<32>, bitset<32>> _roundEncrypt(bitset<32> Li_minus_1, bitset<32> Ri_minus_1, bitset<48> ki);
-    pair<bitset<32>, bitset<32>> _roundDecrypt(bitset<32> Li, bitset<32> Ri, bitset<48> ki);
 
     bitset<32> _f(bitset<32> Ri_minus_1, bitset<48> ki); // функция Фейстеля
 
