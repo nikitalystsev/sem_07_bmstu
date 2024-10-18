@@ -22,8 +22,11 @@ bitset<64> DES::encryptBlock(bitset<64> block, bitset<64> key) {
         Ri = value.second;
     }
 
+    // объединяем блоки
+    bitset<64> encryptBlock = this->_uniteRiAndLi(Ri, Li);
+
     // применение конечной перестановки
-    return this->_applyIpInv(Li, Ri);
+    return this->_applyIpInv(encryptBlock);
 }
 
 bitset<64> DES::decryptBlock(bitset<64> block, bitset<64> key) {
@@ -44,8 +47,11 @@ bitset<64> DES::decryptBlock(bitset<64> block, bitset<64> key) {
         Ri = value.second;
     }
 
+    // объединяем блоки
+    bitset<64> encryptBlock = this->_uniteRiAndLi(Ri, Li);
+
     // применение конечной перестановки
-    return this->_applyIpInv(Li, Ri);
+    return this->_applyIpInv(encryptBlock);
 }
 
 
@@ -233,18 +239,12 @@ bitset<32> DES::_applyP(bitset<32> value) {
     return newValue;
 }
 
-bitset<64> DES::_applyIpInv(bitset<32> Li, bitset<32> Ri) {
-    bitset<64> tmpRes;
-
-    for (int i = 0; i < 32; i++) {
-        tmpRes[i] = Ri[i];
-        tmpRes[i + 32] = Li[i];
-    }
+bitset<64> DES::_applyIpInv(bitset<64> block) {
 
     int i = 0;
     bitset<64> result;
     for (auto index: this->_ipInv) {
-        result[i] = tmpRes[index - 1];
+        result[i] = block[index - 1];
         i++;
     }
 
@@ -258,4 +258,15 @@ vector<bitset<48>> DES::_genRoundKeysForDecrypt(bitset<64> key) {
     reverse(roundKeys.begin(), roundKeys.end());
 
     return roundKeys;
+}
+
+bitset<64> DES::_uniteRiAndLi(bitset<32> val1, bitset<32> val2) {
+    bitset<64> tmpRes;
+
+    for (int i = 0; i < 32; i++) {
+        tmpRes[i] = val1[i];
+        tmpRes[i + 32] = val2[i];
+    }
+
+    return tmpRes;
 }

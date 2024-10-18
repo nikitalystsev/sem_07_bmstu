@@ -144,7 +144,10 @@ private:
 
     bitset<32> _applyP(bitset<32> value);
 
-    bitset<64> _applyIpInv(bitset<32> Li, bitset<32> Ri);
+    bitset<64> _applyIpInv(bitset<64> block);
+
+    bitset<64> _uniteRiAndLi(bitset<32> val1, bitset<32> val2);
+
 public:
     DES() = default;
 
