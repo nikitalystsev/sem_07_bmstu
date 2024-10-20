@@ -22,7 +22,7 @@ class ErlangDistribution:
         """
         Метод, возвращающий значение функции распределения
         """
-        right_part = sum([pow(self.lambda_ * x, i) / m.factorial(i) for i in range(self.k)])
+        right_part = sum([pow(self.lambda_ * x, i) / m.factorial(i) for i in range(self.k + 1)])
 
         return 1 - m.exp((-1) * self.lambda_ * x) * right_part
 
@@ -31,9 +31,9 @@ class ErlangDistribution:
         Метод, возвращающий значение функции плотности распределения
         """
 
-        numerator = m.exp((-1) * self.lambda_ * x) * self.lambda_ * pow(self.lambda_ * x, self.k - 1)
+        numerator = m.exp((-1) * self.lambda_ * x) * self.lambda_ * pow(self.lambda_ * x, self.k)
 
-        return numerator / m.factorial(self.k - 1)
+        return numerator / m.factorial(self.k)
 
 
 def get_interval_x_min_x_max():
@@ -68,9 +68,9 @@ def get_k_and_lambda():
               "λ - действительное число.")
         return
 
-    if k <= 0 or _lambda < 0:
+    if k < 0 or _lambda < 0:
         print("\n\nОшибка. Неверно заданы параметры для распределения Эрланга!\n"
-              "Требуется, чтобы λ >= 0, k = 1, 2, ...!")
+              "Требуется, чтобы λ >= 0, k = 0, 1, 2, ...!")
         return
 
     return k, _lambda

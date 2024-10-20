@@ -29,27 +29,27 @@ int main() {
     /*
      * текстовые сообщения
      */
-    string keyForStr = "key12345";
-    string message = "B";
-
-    cout << "message: " << message << endl;
-
-    string encryptMessage = pcbc.encryptString(message, keyForStr);
-
-    cout << "encryptMessage: " << encryptMessage << endl;
-
-    string decryptMessage = pcbc.decryptString(encryptMessage, keyForStr);
-
-    cout << "decryptMessage: " << decryptMessage << endl;
+//    string keyForStr = "key12345";
+//    string message = "B";
+//
+//    cout << "message: " << message << endl;
+//
+//    string encryptMessage = pcbc.encryptString(message, keyForStr);
+//
+//    cout << "encryptMessage: " << encryptMessage << endl;
+//
+//    string decryptMessage = pcbc.decryptString(encryptMessage, keyForStr);
+//
+//    cout << "decryptMessage: " << decryptMessage << endl;
 
     /*
      * произвольные файлы
      */
-//    string keyForFiles = "key12345";
-//    string filepath = "../data/test.txt";
-//    string encryptFilepath = "../data/encrypt_test.txt";
-//    string decryptFilepath = "../data/decrypt_test.txt";
-//
+    string keyForFiles = "key12345";
+    string filepath = "../report/report.pdf";
+    string encryptFilepath = "../report/encrypt_report.pdf";
+    string decryptFilepath = "../report/decrypt_report.pdf";
+
 //    pcbc.encryptFile(filepath, encryptFilepath, keyForFiles);
-//    pcbc.decryptFile(encryptFilepath, decryptFilepath, keyForFiles);
+    pcbc.decryptFile(encryptFilepath, decryptFilepath, keyForFiles);
 }

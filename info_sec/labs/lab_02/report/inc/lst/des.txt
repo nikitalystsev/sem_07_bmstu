@@ -10,6 +10,7 @@ bitset<64> DES::encryptBlock(bitset<64> block, bitset<64> key) {
         Li = value.first;
         Ri = value.second;
     }
-
-    return this->_applyIpInv(Li, Ri);
+	bitset<64> encryptBlock = this->_uniteRiAndLi(Ri, Li);
+	
+    return this->_applyIpInv(encryptBlock);
 }

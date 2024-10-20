@@ -1,10 +1,10 @@
 \chapter{Распределение Эрланга}
 
-Случайная величина $X$ имеет \textit{распределения Эрланга} c параметрами $\lambda$ и $k$ ($(\lambda \geqslant 0; k = 1, 2, ...)$, $x \geqslant 0$) если ее плотность распределения~$f_k(x)$ равна:
+Случайная величина $X$ имеет \textit{распределения Эрланга} c параметрами $\lambda$ и $k$ ($(\lambda \geqslant 0; k = 0, 1, 2, ...)$, $x \geqslant 0$) если ее плотность распределения~$f_k(x)$ равна:
 
 \begin{equation}
 	\begin{aligned}
-		f_k(x) = \frac{\lambda \cdot (\lambda \cdot x)^{k - 1}}{(k - 1)!} \cdot e^{-\lambda \cdot x}.
+		f_k(x) = \frac{\lambda \cdot (\lambda \cdot x)^{k}}{k!} \cdot e^{-\lambda \cdot x}.
 	\end{aligned}
 \end{equation}
 
@@ -12,7 +12,7 @@
 
 \begin{equation}
 	\begin{aligned}
-		F_k(x) = 1 - e^{-\lambda \cdot x} \cdot \sum_{i = 1}^{k - 1} \frac{(\lambda \cdot x)^i}{i!}.
+		F_k(x) = 1 - e^{-\lambda \cdot x} \cdot \sum_{i = 0}^{k} \frac{(\lambda \cdot x)^i}{i!}.
 	\end{aligned}
 \end{equation}
 

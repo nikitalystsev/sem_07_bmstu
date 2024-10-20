@@ -34,7 +34,7 @@ private:
 
     vector<bitset<64>> _getVBitset64FromVChar(const vector<char> &value);
 
-    vector<char> _getCharBytesFromFile(const string &filepath);
+    static vector<char> _getCharBytesFromFile(const string &filepath);
 
     vector<char> _encrypt(vector<bitset<64>> &strBlocks, bitset<64> &bitsetKey);
 

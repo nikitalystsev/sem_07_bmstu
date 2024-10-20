@@ -5,7 +5,7 @@ import erlang_distribution as ed
 def main():
     while True:
         print(
-            "\n\nВыберите тип закона распределения: \n"
+            "\n\nВыберите закон распределения: \n"
             "   1) Равномерное распределение;\n"
             "   2) Распределение Эрланга;\n"
             "   0) Завершить выполнение программы.\n"
@@ -23,7 +23,7 @@ def main():
                     continue
                 ud.draw_uniform_distribution_graphs(ud.UniformDistribution(*uniform_params))
             case 2:
-                erlang_params = ud.get_interval_a_b()
+                erlang_params = ed.get_k_and_lambda()
                 if erlang_params is None:
                     continue
                 ed.draw_erlang_distribution_graphs(ed.ErlangDistribution(*erlang_params))

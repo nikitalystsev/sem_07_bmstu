@@ -163,13 +163,6 @@ pair<bitset<32>, bitset<32>> DES::_roundEncrypt(bitset<32> Li_minus_1, bitset<32
 }
 
 
-pair<bitset<32>, bitset<32>> DES::_roundDecrypt(bitset<32> Li, bitset<32> Ri, bitset<48> ki) {
-    bitset<32> Ri_minus_1 = Li;
-    bitset<32> Li_minus_1 = Ri ^ this->_f(Li, ki);
-
-    return pair<bitset<32>, bitset<32>>{Li_minus_1, Ri_minus_1};
-}
-
 bitset<32> DES::_f(bitset<32> Ri_minus_1, bitset<48> ki) {
     bitset<48> extendRi_minus_1 = this->_applyE(Ri_minus_1);
     bitset<48> xorRi_minus_1 = extendRi_minus_1 ^ ki;
