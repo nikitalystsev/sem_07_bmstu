@@ -1,0 +1,13 @@
+		}
+		
+		bitset<4> s_res = this->_applyS(tmp, i);
+
+        for (int p = 0; p < 4; p++) {
+            result[p + k] = s_res[p];
+        }
+
+        k += 4;
+    }
+
+    return this->_applyP(result);
+}

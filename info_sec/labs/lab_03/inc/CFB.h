@@ -6,11 +6,9 @@
 #define LAB_03_CFB_H
 
 
-
 class CFB {
 
 };
-
 
 
 #endif //LAB_03_CFB_H

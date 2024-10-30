@@ -1,0 +1,18 @@
+vector<char> PCBC::_encrypt(vector<bitset<64>> &strBlocks, bitset<64> &bitsetKey) {
+    bitset<64> Ci_minus_1 = this->_iv;
+    vector<char> encryptedStr;
+
+    for (auto strBlock: strBlocks) {
+        bitset<64> encryptBlock = this->_des.encryptBlock(Ci_minus_1 ^ strBlock, bitsetKey);
+
+        vector<char> tmpRes = PCBC::_bitset64ToVChar(encryptBlock);
+
+        for (auto symbol: tmpRes) {
+            encryptedStr.push_back(symbol);
+        }
+
+        Ci_minus_1 = encryptBlock ^ strBlock;
+    }
+
+    return encryptedStr;
+}
