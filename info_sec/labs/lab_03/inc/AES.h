@@ -113,6 +113,7 @@ public:
 
     vector<uint8_t> encryptBlock(const vector<uint8_t> &input, const vector<uint8_t> &key);
 
+    // оказался не нужен для режима шифрования CFB
     vector<uint8_t> decryptBlock(const vector<uint8_t> &encryptInput, const vector<uint8_t> &key);
 };
 
