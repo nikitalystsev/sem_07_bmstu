@@ -75,7 +75,7 @@ private:
 private:
     [[nodiscard]] vector<vector<uint8_t>> _inputToState(const vector<uint8_t> &input) const;
 
-    vector<uint8_t> _stateToOutput(const vector<vector<uint8_t>> &state) const;
+    [[nodiscard]] vector<uint8_t> _stateToOutput(const vector<vector<uint8_t>> &state) const;
 
     vector<vector<vector<uint8_t>>> _keyExpansion(const vector<uint8_t> &key);
 
