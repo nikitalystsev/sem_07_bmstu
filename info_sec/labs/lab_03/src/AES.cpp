@@ -5,12 +5,8 @@
 #include <algorithm>
 #include "AES.h"
 
-void printMatrix(const vector<vector<uint8_t>> &matrix);
-
-void print3DMatrix(const vector<vector<vector<uint8_t>>> &matrix);
-
-AES::AES(int nb, int nk, int nr) :
-        _nb{nb}, _nk{nk}, _nr{nr} {
+AES::AES(int nk, int nb, int nr) :
+        _nk{nk}, _nb{nb}, _nr{nr} {
 
 }
 
@@ -262,8 +258,6 @@ vector<vector<vector<uint8_t>>> AES::_convertVecWordsToVecRoundKeys(vector<vecto
         }
     }
 
-//    print3DMatrix(result);
-
     return result;
 }
 
@@ -284,27 +278,4 @@ uint8_t AES::GMul(uint8_t x, uint8_t y) {
     }
 
     return result;
-}
-
-void printMatrix(const vector<vector<uint8_t>> &matrix) {
-    for (const auto &row: matrix) {
-        for (auto byte: row) {
-            cout << static_cast<int>(byte) << " ";
-        }
-
-        cout << endl;
-    }
-}
-
-void print3DMatrix(const vector<vector<vector<uint8_t>>> &matrix) {
-    for (const auto &mtr: matrix) {
-        for (const auto &row: mtr) {
-            for (auto byte: row) {
-                cout << static_cast<int>(byte) << " ";
-            }
-            cout << endl;
-        }
-        cout << endl;
-    }
-
 }

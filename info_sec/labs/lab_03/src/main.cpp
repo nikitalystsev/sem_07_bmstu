@@ -3,6 +3,7 @@
 //
 
 #include "AES.h"
+#include "CFB.h"
 
 /*
  * Реализовать программу шифрования симметричным алгоритмом AES
@@ -15,32 +16,44 @@
  * Вариант 3 (CFB)
  */
 
-
-void printBlock(const vector<uint8_t> &matrix) {
-    for (const auto &val: matrix) {
-        cout << static_cast<int>(val) << " ";
-    }
-    cout << endl;
-}
-
+/*
+ *              nk      nb      nr
+ * AES-128      4       4       10
+ * AES-192      6       4       12
+ * AES-256      8       4       14
+ */
 int main() {
-    AES aes(4, 4, 10);
+    AES aes(8, 4, 14);
+    vector<uint8_t> iv = {16, 15, 14, 13, 13, 12, 11, 10, 9, 8, 7, 6, 5, 4, 3, 2, 1};
 
-    vector<uint8_t> msg = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
-    vector<uint8_t> key = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16};
+    CFB cfb(aes, iv);
 
-    std::cout << "message: " << std::endl;
-    printBlock(msg);
+    /*
+     * текстовые сообщения
+     */
+    string keyForStr = "asdfghjklqwertyuasdfghjklqwertyu";
+    string message = "ffffffffffffffffaaaaaaaaaaaaaaaa";
 
-    vector<uint8_t> encryptMsg = aes.encryptBlock(msg, key);
+    cout << "message: " << message << endl;
 
-    std::cout << "encrypt message: " << std::endl;
-    printBlock(encryptMsg);
+    string encryptMessage = cfb.encryptString(message, keyForStr);
 
-    vector<uint8_t> decryptMsg = aes.decryptBlock(encryptMsg, key);
+    cout << "encryptMessage: " << encryptMessage << endl;
 
-    std::cout << "decrypt message: " << std::endl;
-    printBlock(decryptMsg);
+    string decryptMessage = cfb.decryptString(encryptMessage, keyForStr);
+
+    cout << "decryptMessage: " << decryptMessage << endl;
+
+    /*
+     * произвольные файлы
+     */
+    string keyForFiles = "asdfghjklqwertyuasdfghjklqwertyu";
+    string filepath = "../data/img.png";
+    string encryptFilepath = "../data/encrypt_img.png";
+    string decryptFilepath = "../data/decrypt_img.png";
+
+    cfb.encryptFile(filepath, encryptFilepath, keyForFiles);
+    cfb.decryptFile(encryptFilepath, decryptFilepath, keyForFiles);
 
 
     return 0;
