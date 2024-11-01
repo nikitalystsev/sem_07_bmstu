@@ -1,7 +1,0 @@
-vector<bitset<48>> DES::_genRoundKeys(bitset<64> key) {
-    vector<bitset<48>> keys;
-
-    bitset<56> P1Key = this->_applyP1Ki(key);
-
-    for (auto cntBitsForShift: this->_kiLeftShiftCnt) {
-        bitset<56> tmp = P1Key;

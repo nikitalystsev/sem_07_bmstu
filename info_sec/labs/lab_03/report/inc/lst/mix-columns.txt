@@ -1,0 +1,13 @@
+void AES::_mixColumns(vector<vector<uint8_t>> &state) {
+    for (size_t i = 0; i < 4; ++i) {
+        uint8_t s0 = state[0][i];
+        uint8_t s1 = state[1][i];
+        uint8_t s2 = state[2][i];
+        uint8_t s3 = state[3][i];
+
+        state[0][i] = AES::GMul(s0, 0x02) ^ AES::GMul(s1, 0x03) ^ s2 ^ s3;
+        state[1][i] = s0 ^ AES::GMul(s1, 0x02) ^ AES::GMul(s2, 0x03) ^ s3;
+        state[2][i] = s0 ^ s1 ^ AES::GMul(s2, 0x02) ^ AES::GMul(s3, 0x03);
+        state[3][i] = AES::GMul(s0, 0x03) ^ s1 ^ s2 ^ AES::GMul(s3, 0x02);
+    }
+}
