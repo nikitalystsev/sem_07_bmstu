@@ -4,5 +4,5 @@ web/web_gitlab/
 
 info_sec/labs/lab_*/.idea/
 info_sec/labs/lab_*/cmake-build-debug/
-model/labs/lab_01/.idea/
+model/labs/lab_*/.idea/
 model/labs/lab_*/src/__pycache__/
