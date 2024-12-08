@@ -352,9 +352,9 @@ class MyWindow(tk.Tk):
 
         for i in range(len(res_ode)):
             ax.plot(t, res_ode[i], label=f"P_{i + 1}")
-        #
-        # for i in range(len(probs)):
-        #     ax.plot(times[i], probs[i], 'ro')
+
+        for i in range(len(probs)):
+            ax.plot(stable_times[i], probs[i], 'ro')
 
         ax.set_xlabel("Время (t)")
         ax.set_ylabel("Вероятность P")
@@ -383,7 +383,7 @@ class MyWindow(tk.Tk):
                     elif checks.check_float(value):
                         value = float(value)
                     else:
-                        print(f"value = |{value}|")
+                        # print(f"value = |{value}|")
 
                         messagebox.showwarning(
                             "Предупреждение",
@@ -422,7 +422,6 @@ class MyWindow(tk.Tk):
         """
         Метод для проверки, является ли двумерный массив нулевым
         """
-        print(mtr)
 
         for i in range(len(mtr)):
             for j in range(len(mtr[0])):

@@ -1,0 +1,5 @@
+void AES::_shiftRows(vector<vector<uint8_t>> &state) {
+    for (int i = 1; i < state.size(); ++i) {
+        std::rotate(state[i].begin(), state[i].begin() + i, state[i].end());
+    }
+}

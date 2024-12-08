@@ -1,0 +1,18 @@
+vector<uint8_t> AES::encryptBlock(const vector<uint8_t> &input, const vector<uint8_t> &key) {
+    vector<vector<vector<uint8_t>>> roundKeys = this->_keyExpansion(key);
+	
+    AES::_addRoundKey(state, roundKeys[0]);
+
+    for (int i = 1; i < this->_nr; i++) {
+        this->_subBytes(state);
+        AES::_shiftRows(state);
+        AES::_mixColumns(state);
+        AES::_addRoundKey(state, roundKeys[i]);
+    }
+
+    this->_subBytes(state);
+    AES::_shiftRows(state);
+    AES::_addRoundKey(state, roundKeys[roundKeys.size() - 1]);
+
+    return this->_stateToOutput(state);
+}

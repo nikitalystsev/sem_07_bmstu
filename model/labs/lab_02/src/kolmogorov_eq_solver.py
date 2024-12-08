@@ -104,10 +104,34 @@ class KolmogorovEqSolver:
 
         mtr_intens = np.array(self.__mtr_intens)
 
-        v = mtr_intens.sum(axis=0) - mtr_intens.diagonal()
+        # v = mtr_intens.sum(axis=0) - mtr_intens.diagonal() - mtr_coeff.sum(axis=1)
 
-        stable_times = probs / v
+        """
+        P_i / (сумма входящих в состояние S_i интенсивностей - сумма исходящих)
+        """
+        # stable_times = probs / v
 
-        # print(stable_times, probs, v, mtr_intens, mtr_intens.sum(axis=1), mtr_intens.diagonal(), sep='\n\n')
+        # print("values")
+        # print(stable_times, probs, v, mtr_intens, mtr_intens.sum(axis=0), mtr_intens.sum(axis=1), mtr_intens.diagonal(),
+        #       mtr_intens.sum(axis=0) - mtr_intens.diagonal() - mtr_coeff.sum(axis=1),
+        #       sep='\n\n')
+
+        tmp = list()
+
+        for i in range(len(self.__mtr_intens)):
+            row_sum = sum(mtr_intens[i]) # сумма исходящих из состояния S_i интенсивностей
+            col_sum = 0 # сумма входящих в состояние S_i интенсивностей
+            for j in range(len(self.__mtr_intens[0])):
+                col_sum += mtr_intens[j][i]
+
+            tmp.append(col_sum - row_sum)
+
+        stable_times = list()
+
+        for i in range(len(tmp)):
+            stable_times.append(probs[i] / tmp[i])
+
+        print("values:")
+        print(stable_times)
 
         return probs, stable_times
