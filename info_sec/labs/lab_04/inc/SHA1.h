@@ -23,7 +23,7 @@ private:
 
     static uint32_t _cyclicShiftLeft(uint32_t n, uint32_t b);
 
-    static mpz_class _hash(vector<uint8_t> &data) ;
+    static mpz_class _hash(vector<uint8_t> &data);
 
 public:
     SHA1() = default;
@@ -31,6 +31,7 @@ public:
     ~SHA1() = default;
 
     static mpz_class hashFile(const string &filename);
+
     static mpz_class hashText(const string &text);
 };
 
