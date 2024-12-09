@@ -6,6 +6,7 @@
 
 #include <gmpxx.h>
 #include "SHA1.h"
+#include "RSA.h"
 
 /*
  * Реализовать программу создания и проверки электронной подписи для документа
@@ -16,15 +17,25 @@
  */
 
 int main() {
-    string inputFile = "../data/test.txt";
+    auto [privateKey, publicKey] = RSA::genPublicAndSecretKeys();
+
+    string inputFile = "../data/img.png";
     mpz_class hashFile = SHA1::hashFile(inputFile);
 
-    cout << "file Hash:    " << hashFile.get_str(16) << endl;
+    cout << "hash:    " << hashFile.get_str(16) << endl;
+    cout << "hash length:    " << hashFile.get_str(16).length() << endl;
 
-    string message = "test message";
-    mpz_class hashMessage = SHA1::hashText(message);
+    mpz_class signature = RSA::calcSignature(privateKey.d, privateKey.n, hashFile);
 
-    cout << "message Hash: " << hashMessage.get_str(16) << endl;
+    cout << "signature:     " << signature.get_str(16) << endl;
+
+    mpz_class hash = RSA::calcPrototypeSignature(publicKey.e, publicKey.n, signature);
+
+    if (RSA::isCorrectSignature(hashFile, hash)) {
+        cout << "signature is correct" << endl;
+    } else {
+        cout << "signature is incorrect" << endl;
+    }
 
     return 0;
 }
