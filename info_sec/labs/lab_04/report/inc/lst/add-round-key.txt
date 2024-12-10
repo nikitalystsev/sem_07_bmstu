@@ -1,7 +1,0 @@
-void AES::_addRoundKey(vector<vector<uint8_t>> &state, const vector<vector<uint8_t>> &roundKey) {
-    for (int i = 0; i < state.size(); ++i) {
-        for (int j = 0; j < state[0].size(); ++j) {
-            state[i][j] ^= roundKey[i][j];
-        }
-    }
-}
