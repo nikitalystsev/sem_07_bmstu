@@ -40,14 +40,12 @@ mpz_class SHA1::_hash(vector<uint8_t> &data) {
 
     SHA1::_preprocessing(data);
 
-    array<uint32_t, 80> words = {0}; // 80 32-битных слов (сразу)
-
     for (int i = 0; i < data.size(); i += 64) {
         vector<uint8_t> chunk = SHA1::_getSlice(data, i, i + 64);
 
-        for (uint8_t wid = 0; wid < 16; ++wid) { // заполняем первые 16 32-битных слов
-            words[wid] = 0;
+        array<uint32_t, 80> words = {0}; // 80 32-битных слов (сразу)
 
+        for (uint8_t wid = 0; wid < 16; ++wid) { // заполняем первые 16 32-битных слов
             for (uint8_t cid = 0; cid < 4; cid++) {
                 words[wid] = (words[wid] << 8) + chunk[wid * 4 + cid];
             }
