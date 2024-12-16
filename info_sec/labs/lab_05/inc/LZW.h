@@ -13,19 +13,10 @@
 #include <filesystem>
 #include <fstream>
 #include <unordered_map>
+#include <stack>
+#include "TrieTree.h"
 
 using namespace std;
-
-// префиксное дерево для словарей
-struct TrieNode {
-    uint8_t code;
-    unordered_map<uint8_t, TrieNode> children;
-};
-
-struct TrieTree {
-    TrieNode *root;
-};
-
 
 class LZW {
 private:
@@ -33,20 +24,26 @@ private:
 
 private:
     static void _initDict(TrieTree &dict);
+    static void _initVectorKeys(vector<vector<uint16_t>> &keys);
 
-    static vector<uint8_t> _getUint8BytesFromFile(const string &filepath);
+    static vector<uint16_t> _getUint8BytesFromFile(const string &filepath);
 
-    vector<uint8_t> _compress(const vector<uint8_t> &data);
+    vector<uint16_t> _compress(const vector<uint16_t> &data);
 
-    vector<uint8_t> _decompress(const vector<uint8_t> &data);
+    vector<uint16_t> _decompress(const vector<uint16_t> &data);
 
-    static void _writeData(const string &outputFilename, const vector<uint8_t> &data);
+    static void _writeData(const string &outputFilename, const vector<uint16_t> &data);
+
+    vector<uint16_t> _getKeyByCode(const vector<vector<uint16_t>> &keys, uint16_t code);
 
 public:
     LZW();
+
     ~LZW();
-    pair<vector<uint8_t>, vector<uint8_t>> compressFile(const string &filename, const string &outputFilename);
-    pair<vector<uint8_t>, vector<uint8_t>> decompressFile(const string &filename, const string &outputFilename);
+
+    pair<vector<uint16_t>, vector<uint16_t>> compressFile(const string &filename, const string &outputFilename);
+
+    pair<vector<uint16_t>, vector<uint16_t>> decompressFile(const string &filename, const string &outputFilename);
 };
 
 

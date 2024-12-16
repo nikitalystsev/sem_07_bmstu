@@ -10,4 +10,6 @@ add_executable(
         src/main.cpp
         inc/LZW.h
         src/LZW.cpp
+        inc/TrieTree.h
+        src/TrieTree.cpp
 )

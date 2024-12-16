@@ -1,0 +1,38 @@
+mpz_class SHA1::_hash(vector<uint8_t> &data) {
+    uint32_t h0 = 0x67452301;
+    uint32_t h1 = 0xEFCDAB89;
+    uint32_t h2 = 0x98BADCFE;
+    uint32_t h3 = 0x10325476;
+    uint32_t h4 = 0xC3D2E1F0;
+
+    SHA1::_preprocessing(data);
+
+    array<uint32_t, 80> words = {0}; 
+
+    for (int i = 0; i < data.size(); i += 64) {
+        vector<uint8_t> chunk = SHA1::_getSlice(data, i, i + 64);
+
+        for (uint8_t wid = 0; wid < 16; ++wid) { 
+            words[wid] = 0;
+
+            for (uint8_t cid = 0; cid < 4; cid++) {
+                words[wid] = (words[wid] << 8) + chunk[wid * 4 + cid];
+            }
+        }
+
+        for (uint8_t j = 16; j < 80; ++j) { 
+            words[j] = SHA1::_cyclicShiftLeft(words[j - 3] ^ words[j - 8] ^ words[j - 14] ^ words[j - 16], 1);
+        }
+
+        uint32_t a = h0, b = h1, c = h2, d = h3, e = h4;
+
+        for (uint8_t ind = 0; ind < 80; ++ind) {
+            uint32_t f = 0, k = 0;
+
+            if (ind < 20) {
+                f = (b & c) | ((~b) & d);
+                k = 0x5A827999;
+            } else if (ind < 40) {
+                f = b ^ c ^ d;
+                k = 0x6ED9EBA1;
+            } else if (ind < 60) {
