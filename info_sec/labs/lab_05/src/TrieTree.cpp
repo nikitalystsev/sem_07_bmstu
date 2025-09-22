@@ -17,7 +17,7 @@ void TrieTree::setRoot(TrieNode *newRoot) {
     this->_root = newRoot;
 }
 
-bool TrieTree::contains(const vector<uint8_t> &codes) {
+bool TrieTree::contains(const vector<uint16_t> &codes) {
 //    cout << "call contains" << endl;
 
     if (!this->_root) return false;
@@ -40,7 +40,7 @@ bool TrieTree::contains(const vector<uint8_t> &codes) {
     return true;
 }
 
-void TrieTree::insert(const vector<uint8_t> &values) {
+void TrieTree::insert(const vector<uint16_t> &values) {
     if (!this->_root) return;
     if (values.empty()) return;
 
@@ -61,7 +61,7 @@ void TrieTree::insert(const vector<uint8_t> &values) {
 }
 
 void TrieTree::print() {
-    stack<tuple<uint8_t, const TrieNode *, int>> stack;
+    stack<tuple<uint16_t, const TrieNode *, int>> stack;
     stack.emplace(0, this->_root, 0);
 
     while (!stack.empty()) {
@@ -86,7 +86,7 @@ TrieNode *TrieTree::getRoot() {
     return this->_root;
 }
 
-int TrieTree::getCode(const vector<uint8_t> &values) {
+int TrieTree::getCode(const vector<uint16_t> &values) {
     if (!this->_root) return -1;
     if (values.empty()) return -1;
 
@@ -111,23 +111,41 @@ int TrieTree::getCode(const vector<uint8_t> &values) {
     return code;
 }
 
-uint32_t TrieTree::encode(const vector<uint8_t> &values) {
+uint16_t TrieTree::encode(const vector<uint16_t> &values) {
     return this->getCode(values);
 }
 
 
-uint32_t TrieTree::_getMaxCode(const TrieNode &node) {
-    uint32_t maxCode = node.code;
+vector<uint16_t> TrieTree::getByCode(uint16_t code) {
+    vector<uint16_t> result;
+
+    this->_getByCode(*this->_root, code, result);
+
+    return result;
+}
+
+void TrieTree::_getByCode(const TrieNode &node, uint16_t code, vector<uint16_t> &result) {
+    if (node.code == code && node.isKey) {
+        result.push_back(node.code);
+    }
 
     for (const auto &pair: node.children) {
-        uint32_t childMaxCode = TrieTree::_getMaxCode(pair.second);
+        TrieTree::_getByCode(pair.second, code, result);
+    }
+}
+
+uint16_t TrieTree::_getMaxCode(const TrieNode &node) {
+    uint16_t maxCode = node.code;
+
+    for (const auto &pair: node.children) {
+        uint16_t childMaxCode = TrieTree::_getMaxCode(pair.second);
         maxCode = std::max(maxCode, childMaxCode);
     }
 
     return maxCode;
 }
 
-uint32_t TrieTree::getMaxCode() {
+uint16_t TrieTree::getMaxCode() {
     return this->_getMaxCode(*this->_root);
 }
 

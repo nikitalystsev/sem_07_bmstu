@@ -8,3 +8,5 @@ info_sec/labs/lab_*/report/svg-inkscape/
 
 model/labs/lab_*/.idea/
 model/labs/lab_*/src/__pycache__/
+
+network/lects/
