@@ -1,0 +1,31 @@
+\chapter{Критерий случайности}
+
+Для последовательности $(a_1, a_2, \dots, a_n)$ вычисляется среднее арифметическое четных чисел ($Avg_{even}$) и нечетных чисел ($Avg_{odd}$), которое вычисляется по формуле \ref{equ:ratio_avg}:
+
+\begin{equation}
+	\label{equ:ratio_avg}
+	R_{avg} = \begin{cases} 
+		\frac{Avg_{odd}}{Avg_{even}}, & \text{если } Avg_{odd} \leq Avg_{even}, \\
+		\frac{Avg_{even}}{Avg_{odd}}, & \text{иначе}.
+	\end{cases}
+\end{equation}
+
+Далее для последовательности $(a_1, a_2, \dots, a_n)$  вычисляется отношения количество пар, где значение возрастает (\( a_i < a_{i+1} \), $N_{\text{рост}}$) к количеству пар, где значение убывает (\( a_i > a_{i+1} \), $N_{\text{рост}}$) по формуле \ref{equ:ratio_pair}:
+
+\begin{equation}
+	\label{equ:ratio_pair}
+	R_{pair} = \begin{cases} 
+		\frac{N_{\text{рост}}}{N_{\text{падение}}}, & \text{если } N_{\text{рост}} \leq N_{\text{падение}}, \\
+		\frac{N_{\text{падение}}}{N_{\text{рост}}}, & \text{иначе}.
+	\end{cases}
+\end{equation}
+
+Критерием случайности последовательности $(a_1, a_2, \dots, a_n)$ будет являться минимальное из $R_{avg}$ и $R_{pair}$, определяющееся по формуле \ref{equ:ratio}:
+
+\begin{equation}
+	\label{equ:ratio}
+	R = \min(R_{avg}, R_{pair})
+\end{equation}
+
+Чем ближе  значение $R$ к 1, тем последовательность считается более случайной.
+
