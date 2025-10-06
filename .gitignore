@@ -6,7 +6,7 @@ info_sec/labs/lab_*/.idea/
 info_sec/labs/lab_*/cmake-build-debug/
 info_sec/labs/lab_*/report/svg-inkscape/
 
-model/labs/lab_*/.idea/
-model/labs/lab_*/src/__pycache__/
+model/labs/lab_2024/lab_*/.idea/
+model/labs/lab_2025/lab_*/src/__pycache__/
 
 network/lects/
