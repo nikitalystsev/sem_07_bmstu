@@ -1,0 +1,8 @@
+            continue;
+        }
+
+        encryptStr += static_cast<char>(encryptSymbol);
+    }
+
+    return encryptStr;
+}
