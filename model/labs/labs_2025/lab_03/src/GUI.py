@@ -11,7 +11,8 @@ import config_GUI as cfg
 
 import checks
 from distribution_params_frame import DistributionParamsFrame
-from uniform_distribution import UniformDistribution
+from distributions import UniformDistribution, PoissonDistribution, ExponentialDistribution, NormalDistribution
+from table import Table
 
 # from PointClass import Point
 
@@ -33,8 +34,8 @@ class MyWindow(tk.Tk):
 
         self.title("Лабораторная №2, Лысцев Никита ИУ7-73Б")
 
-        root_width = 1280
-        root_height = 720
+        root_width = 1600
+        root_height = 900
         self.geometry(f"{root_width}x{root_height}+0+0")
         self.resizable(width=False, height=False)
 
@@ -54,6 +55,11 @@ class MyWindow(tk.Tk):
         self._frame_results = self.__create_frame(master=self)
         self._frame_results.config(background="#b0b0b0")
         self._frame_results.pack(side=tk.LEFT, expand=True, fill="both")
+
+        self._frame_graphs = self.__create_frame(master=self._frame_results)
+        self._frame_graphs.config(background="#b0b0b0")
+        self._frame_graphs.pack()
+
         # -----------------------------------------------
 
         # constants
@@ -65,6 +71,9 @@ class MyWindow(tk.Tk):
 
         # distributions
         self._uniform = UniformDistribution(0, 0)  # random params
+        self._poisson = PoissonDistribution(0)  # also random param
+        self._exponential = ExponentialDistribution(0)  # absolutely random
+        self._normal = NormalDistribution(0, 1)  # randomly
         # -----------------------------------------------
 
         # widgets
@@ -152,7 +161,7 @@ class MyWindow(tk.Tk):
             row=101, column=0, columnspan=4, sticky='wens', padx=10, pady=30)
 
         self._lbl_input_x_min = self.__create_label(
-            master=self._frame_widgets, text="X_min")
+            master=self._frame_widgets, text="x_min")
         self._lbl_input_x_min.config(
             font=(self.cfgWin.FONT, 18, self.cfgWin.FONT_STYLE), background="#3D517F")
         self._lbl_input_x_min.grid(
@@ -169,7 +178,7 @@ class MyWindow(tk.Tk):
         )
 
         self._lbl_input_x_max = self.__create_label(
-            master=self._frame_widgets, text="X_max")
+            master=self._frame_widgets, text="x_max")
         self._lbl_input_x_max.config(
             font=(self.cfgWin.FONT, 18, self.cfgWin.FONT_STYLE), background="#3D517F")
         self._lbl_input_x_max.grid(
@@ -188,11 +197,19 @@ class MyWindow(tk.Tk):
         self._btn_calc = self.__create_button(
             self._frame_widgets, "Вычислить"
         )
-        self._btn_calc.config(command=self.__draw_uniform_distribution_graphs)
+        self._btn_calc.config(
+            font=(self.cfgWin.FONT, 18, self.cfgWin.FONT_STYLE),
+            background=self.cfgWin.WHITE,
+            command=self.__draw_selected_data
+        )
         self._btn_calc.grid(
             row=104, column=0, columnspan=4,
-            sticky='wens', padx=10, pady=5
+            sticky='wens', padx=10, pady=30
         )
+
+        self._table = Table(master=self._frame_results)
+        self._table.config(background="#b0b0b0")
+        self._table.pack(pady=30)
 
     # def __create_display(self, master: tk.Tk | tk.Frame) -> intensity_matrix.Display:
     #     """
@@ -425,9 +442,6 @@ class MyWindow(tk.Tk):
         return _a, _b
 
     def __draw_uniform_distribution_graphs(self):
-        """
-        Функция для построения графика функции равномерного распределения на фрейме 
-        """
         params = self.__get_uniform_a_b()
         if params is None:
             return
@@ -446,42 +460,455 @@ class MyWindow(tk.Tk):
 
         step = (x_max - x_min) / 1000
         x = x_min
-
         while x <= x_max:
             uniform_distribution_list.append(self._uniform.F(x))
             uniform_distribution_density_list.append(self._uniform.f(x))
             x_list.append(x)
             x += step
 
-        # Очистим старый график, если он уже был
-        for widget in self._frame_results.winfo_children():
+        for widget in self._frame_graphs.winfo_children():
             widget.destroy()
 
-        # Создаём фигуру matplotlib
-        fig = Figure(figsize=(9, 3), dpi=100)
+        # Сделаем фигуру шире и включим constrained_layout
+        fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
 
         ax1 = fig.add_subplot(121)
         ax1.plot(x_list, uniform_distribution_list)
-        ax1.set_title('Функция распределения')
+        ax1.set_title('Функция распределения F(x)')
         ax1.set_xlabel('x')
-        ax1.set_ylabel('F(x)')
+        ax1.set_ylabel('F(x)', labelpad=8)
         ax1.grid(True)
 
         ax2 = fig.add_subplot(122)
         ax2.plot(x_list, uniform_distribution_density_list)
-        ax2.set_title('Функция плотности распределения')
+        ax2.set_title('Функция плотности распределения f(x)')
         ax2.set_xlabel('x')
-        ax2.set_ylabel('f(x)')
+        ax2.set_ylabel('f(x)', labelpad=8)
         ax2.grid(True)
 
-        # Сохраняем график
+        # поворот xticks если много меток (опционально)
+        for ax in (ax1, ax2):
+            for lbl in ax.get_xticklabels():
+                lbl.set_rotation(0)
+
+        # Явно увеличим горизонтальный промежуток между субплотами
+        fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
+                            bottom=0.15, wspace=0.35)
+
+        # Сохранение: bbox_inches='tight' чтобы ничего не обрезалось
         save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "uniform")
         os.makedirs(save_dir, exist_ok=True)
         filename = os.path.join(
             save_dir, f"ud_{self._uniform.get_a()}_{self._uniform.get_b()}.svg")
-        fig.savefig(filename, format="svg")
+        fig.savefig(filename, format="svg",
+                    bbox_inches='tight', pad_inches=0.02)
 
         # Встраиваем в tkinter Frame
-        canvas = FigureCanvasTkAgg(fig, master=self._frame_results)
+        canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
         canvas.draw()
         canvas.get_tk_widget().pack(fill="both", expand=True)
+
+    def __draw_uniform_expectation_and_variance(self):
+        """
+        метод будет создавать таблицу с мат ожиданием и дисперсией случайной величины
+        """
+        params = self.__get_uniform_a_b()
+        if params is None:
+            return
+
+        self._uniform.set_params(*params)
+
+        self._table.create_and_place_table(2, 1, ["M[X]", "D[X]"], ["Values"])
+
+        data = [
+            [f"{self._uniform.M(): .3f}"],
+            [f"{self._uniform.D(): .3f}"]
+        ]
+        self._table.set_data(data=data)
+
+    def __draw_uniform_data(self):
+        """
+        Метод выводит данные
+        """
+        self.__draw_uniform_distribution_graphs()
+        self.__draw_uniform_expectation_and_variance()
+
+    def __get_poisson_lamb(self):
+        """
+        Метод получает параметр λ распределения Пуассона
+        """
+        values = self._frame_distribution_params.get_values()
+        lamb = values["λ"]
+
+        if not self.__is_number(lamb):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести параметр λ распределения Пуассона"
+            )
+            return
+
+        _lamb = 0
+
+        if checks.check_int(lamb):
+            _lamb = int(lamb)
+        else:
+            _lamb = float(lamb)
+
+        if (_lamb <= 0):
+            messagebox.showwarning(
+                "Ошибка!",
+                "λ > 0"
+            )
+            return
+
+        return _lamb
+
+    def __draw_poisson_distribution_graphs(self):
+        lamb = self.__get_poisson_lamb()
+        if lamb is None:
+            return
+
+        self._poisson.set_lambda(lamb)
+
+        x_ranges = self.__get_interval_x_min_x_max()
+        if x_ranges is None:
+            return
+
+        x_min, x_max = x_ranges
+        x_min = max(0, int(x_min))  # Пуассон >= 0
+        x_max = int(x_max)
+
+        x_list = list(range(x_min, x_max + 1))
+        cdf_list = [self._poisson.F(x) for x in x_list]
+        pmf_list = [self._poisson.p(x) for x in x_list]
+
+        for widget in self._frame_graphs.winfo_children():
+            widget.destroy()
+
+        fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
+
+        # CDF график (ступенчатый)
+        ax1 = fig.add_subplot(121)
+        ax1.step(x_list, cdf_list, where='post')
+        ax1.set_title('Функция распределения F(x)')
+        ax1.set_xlabel('x')
+        ax1.set_ylabel('F(x)', labelpad=8)
+        ax1.grid(True)
+
+        # PMF график (дискретные точки)
+        ax2 = fig.add_subplot(122)
+        ax2.scatter(x_list, pmf_list, color='red', s=40)  # s — размер точек
+        ax2.set_title('Функция вероятности p(x)')
+        ax2.set_xlabel('x')
+        ax2.set_ylabel('P(X=x)', labelpad=8)
+        ax2.grid(True, axis='y')
+
+        fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
+                            bottom=0.15, wspace=0.35)
+
+        save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "poisson")
+        os.makedirs(save_dir, exist_ok=True)
+        filename = os.path.join(save_dir, f"poisson_{lamb}.svg")
+        fig.savefig(filename, format="svg",
+                    bbox_inches='tight', pad_inches=0.02)
+
+        canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+    def __draw_poisson_expectation_and_variance(self):
+        """
+        метод будет создавать таблицу с мат ожиданием и дисперсией случайной величины
+        """
+        lamb = self.__get_poisson_lamb()
+        if lamb is None:
+            return
+
+        self._poisson.set_lambda(lamb)
+
+        self._table.create_and_place_table(2, 1, ["M[X]", "D[X]"], ["Values"])
+
+        data = [
+            [f"{self._poisson.M(): .3f}"],
+            [f"{self._poisson.D(): .3f}"]
+        ]
+        self._table.set_data(data=data)
+
+    def __draw_poissom_data(self):
+        """
+        Метод выводит данные
+        """
+        self.__draw_poisson_distribution_graphs()
+        self.__draw_poisson_expectation_and_variance()
+
+    def __get_exponential_lamb(self):
+        """
+        Метод получает параметр λ экспоненциального распределения
+        """
+        values = self._frame_distribution_params.get_values()
+        lamb = values["λ"]
+
+        if not self.__is_number(lamb):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести параметр λ экспоненциального распределения"
+            )
+            return
+
+        _lamb = 0
+
+        if checks.check_int(lamb):
+            _lamb = int(lamb)
+        else:
+            _lamb = float(lamb)
+
+        if (_lamb <= 0):
+            messagebox.showwarning(
+                "Ошибка!",
+                "λ > 0"
+            )
+            return
+
+        return _lamb
+
+    def __draw_exponential_distribution_graphs(self):
+        lamb = self.__get_exponential_lamb()
+        if lamb is None:
+            return
+
+        self._exponential.set_lambda(lamb)
+
+        x_ranges = self.__get_interval_x_min_x_max()
+        if x_ranges is None:
+            return
+
+        x_min, x_max = x_ranges
+
+        x_list = []
+        uniform_distribution_list = []
+        uniform_distribution_density_list = []
+
+        step = (x_max - x_min) / 1000
+        x = x_min
+        while x <= x_max:
+            uniform_distribution_list.append(self._exponential.F(x))
+            uniform_distribution_density_list.append(self._exponential.f(x))
+            x_list.append(x)
+            x += step
+
+        for widget in self._frame_graphs.winfo_children():
+            widget.destroy()
+
+        # Сделаем фигуру шире и включим constrained_layout
+        fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
+
+        ax1 = fig.add_subplot(121)
+        ax1.plot(x_list, uniform_distribution_list)
+        ax1.set_title('Функция распределения F(x)')
+        ax1.set_xlabel('x')
+        ax1.set_ylabel('F(x)', labelpad=8)
+        ax1.grid(True)
+
+        ax2 = fig.add_subplot(122)
+        ax2.plot(x_list, uniform_distribution_density_list)
+        ax2.set_title('Функция плотности распределения f(x)')
+        ax2.set_xlabel('x')
+        ax2.set_ylabel('f(x)', labelpad=8)
+        ax2.grid(True)
+
+        # поворот xticks если много меток (опционально)
+        for ax in (ax1, ax2):
+            for lbl in ax.get_xticklabels():
+                lbl.set_rotation(0)
+
+        # Явно увеличим горизонтальный промежуток между субплотами
+        fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
+                            bottom=0.15, wspace=0.35)
+
+        # Сохранение: bbox_inches='tight' чтобы ничего не обрезалось
+        save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "exponential")
+        os.makedirs(save_dir, exist_ok=True)
+        filename = os.path.join(
+            save_dir, f"exp_{lamb}.svg")
+        fig.savefig(filename, format="svg",
+                    bbox_inches='tight', pad_inches=0.02)
+
+        # Встраиваем в tkinter Frame
+        canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+    def __draw_exponential_expectation_and_variance(self):
+        """
+        метод будет создавать таблицу с мат ожиданием и дисперсией случайной величины
+        """
+        lamb = self.__get_exponential_lamb()
+        if lamb is None:
+            return
+
+        self._exponential.set_lambda(lamb)
+
+        self._table.create_and_place_table(2, 1, ["M[X]", "D[X]"], ["Values"])
+
+        data = [
+            [f"{self._exponential.M(): .3f}"],
+            [f"{self._exponential.D(): .3f}"]
+        ]
+        self._table.set_data(data=data)
+
+    def __draw_exponential_data(self):
+        """
+        Метод выводит данные
+        """
+        self.__draw_exponential_distribution_graphs()
+        self.__draw_exponential_expectation_and_variance()
+
+    def __get_normal_mu_sigma(self):
+        """
+        Метод получает параметры μ и σ нормального распределения
+        """
+        values = self._frame_distribution_params.get_values()
+        mu = values["μ"]
+        sigma = values["σ"]
+
+        if not self.__is_number(mu) or not self.__is_number(sigma):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести параметры μ и σ нормального распределения"
+            )
+            return
+
+        _mu, _sigma = 0, 0
+
+        if checks.check_int(mu):
+            _mu = int(mu)
+        else:
+            _mu = float(mu)
+
+        if checks.check_float(sigma):
+            _sigma = int(sigma)
+        else:
+            _sigma = float(sigma)
+
+        if (_sigma <= 0):
+            messagebox.showwarning(
+                "Ошибка!",
+                "σ > 0"
+            )
+            return
+
+        return _mu, _sigma
+
+    def __draw_normal_distribution_graphs(self):
+        params = self.__get_normal_mu_sigma()
+        if params is None:
+            return
+
+        self._normal.set_params(*params)
+
+        x_ranges = self.__get_interval_x_min_x_max()
+        if x_ranges is None:
+            return
+
+        x_min, x_max = x_ranges
+
+        x_list = []
+        uniform_distribution_list = []
+        uniform_distribution_density_list = []
+
+        step = (x_max - x_min) / 1000
+        x = x_min
+        while x <= x_max:
+            uniform_distribution_list.append(self._normal.F(x))
+            uniform_distribution_density_list.append(self._normal.f(x))
+            x_list.append(x)
+            x += step
+
+        for widget in self._frame_graphs.winfo_children():
+            widget.destroy()
+
+        # Сделаем фигуру шире и включим constrained_layout
+        fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
+
+        ax1 = fig.add_subplot(121)
+        ax1.plot(x_list, uniform_distribution_list)
+        ax1.set_title('Функция распределения F(x)')
+        ax1.set_xlabel('x')
+        ax1.set_ylabel('F(x)', labelpad=8)
+        ax1.grid(True)
+
+        ax2 = fig.add_subplot(122)
+        ax2.plot(x_list, uniform_distribution_density_list)
+        ax2.set_title('Функция плотности распределения f(x)')
+        ax2.set_xlabel('x')
+        ax2.set_ylabel('f(x)', labelpad=8)
+        ax2.grid(True)
+
+        # поворот xticks если много меток (опционально)
+        for ax in (ax1, ax2):
+            for lbl in ax.get_xticklabels():
+                lbl.set_rotation(0)
+
+        # Явно увеличим горизонтальный промежуток между субплотами
+        fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
+                            bottom=0.15, wspace=0.35)
+
+        # Сохранение: bbox_inches='tight' чтобы ничего не обрезалось
+        save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "normal")
+        os.makedirs(save_dir, exist_ok=True)
+        filename = os.path.join(
+            save_dir, f"normal_{params[0]}_{params[1]}.svg")
+        fig.savefig(filename, format="svg",
+                    bbox_inches='tight', pad_inches=0.02)
+
+        # Встраиваем в tkinter Frame
+        canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+    def __draw_normal_expectation_and_variance(self):
+        """
+        метод будет создавать таблицу с мат ожиданием и дисперсией случайной величины
+        """
+        params = self.__get_normal_mu_sigma()
+        if params is None:
+            return
+
+        self._normal.set_params(*params)
+
+        self._table.create_and_place_table(2, 1, ["M[X]", "D[X]"], ["Values"])
+
+        data = [
+            [f"{self._normal.M(): .3f}"],
+            [f"{self._normal.D(): .3f}"]
+        ]
+        self._table.set_data(data=data)
+
+    def __draw_normal_data(self):
+        """
+        Метод выводит данные
+        """
+        self.__draw_normal_distribution_graphs()
+        self.__draw_normal_expectation_and_variance()
+
+    def __draw_selected_data(self):
+        """
+        Метод для отображения данных для выбранного закона распределения
+        """
+
+        distribution_type = self._var_choice_distribution_type.get()
+
+        match distribution_type:
+            case self._uniform_distribution:
+                self.__draw_uniform_data()
+            case self._poisson_distribution:
+                self.__draw_poissom_data()
+            case self._exponential_distribution:
+                self.__draw_exponential_data()
+            case self._normal_distribution:
+                self.__draw_normal_data()
+            case _:
+                messagebox.showwarning(
+                    "Ошибка!",
+                    "Выбран неизвестный закон распределения!"
+                )

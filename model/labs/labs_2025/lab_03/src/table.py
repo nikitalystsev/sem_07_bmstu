@@ -27,7 +27,7 @@ class Table(tk.Frame):
             text=text,
             font=(cfg.ConfigGUI.FONT, 15, cfg.ConfigGUI.FONT_STYLE),
             background="#b0b0b0",
-            width=5
+            width=8
         )
 
     def __create_headers(self, cnt_rows: int, cnt_cols: int, row_headers: list, col_headers: list):
@@ -58,7 +58,7 @@ class Table(tk.Frame):
                     self,
                     relief=tk.SUNKEN,
                     justify=tk.CENTER,
-                    width=5,  # in symbols
+                    width=8,  # in symbols
                     borderwidth=3,
                     highlightbackground="#b0b0b0",
                     highlightcolor="#b0b0b0",
@@ -74,13 +74,6 @@ class Table(tk.Frame):
         """
         Метод для создания и размещения матрицы переходов состояний на дисплее
         """
-        # cnt_states = 3  # debug
-        # tmp = [
-        #     [1.01, 2.95, 3.39],
-        #     [3.07, 3.71, 3.80],
-        #     [3.55, 0.02, 0.83],
-        # ]
-
         self.__create_table(cnt_rows, cnt_cols)
         self.__create_headers(cnt_rows, cnt_cols, row_headers, col_headers)
 
@@ -96,7 +89,6 @@ class Table(tk.Frame):
             for j in range(cnt_cols):
                 self.mtr_entries[i][j].grid(
                     row=i + 1 + 1, column=j + 1, padx=1, pady=1)
-                # self.mtr_entries[i][j].insert(0, f"{tmp[i][j]}")  # debug
                 self.mtr_entries[i][j].grid_anchor("s")
 
     def set_data(self, data: list[list[str]]):
@@ -108,30 +100,6 @@ class Table(tk.Frame):
                 if i < len(self.mtr_entries) and j < len(self.mtr_entries[i]):
                     self.mtr_entries[i][j].delete(0, tk.END)
                     self.mtr_entries[i][j].insert(0, value)
-    # def add_result_prob_and_times(self, probs: list[int | float], stable_times: list[int | float]):
-    #     """
-    #     Метод позволяет добавить вычисленные вероятности состояний
-    #     и время стабилизации на дисплей
-    #     """
-    #     lbl_header = self.__create_label("Результаты")
-    #     lbl_header.grid(row=100, column=0, columnspan=len(
-    #         self.mtr_entries) + 1, padx=5, pady=5)
-
-    #     lbl_p = self.__create_label("P")
-    #     lbl_p.grid(row=101, column=0, padx=5, pady=5)
-
-    #     for i in range(len(probs)):
-    #         lbl_p_val = self.__create_label(f"{probs[i]:.3f}")
-    #         lbl_p_val.config()
-    #         lbl_p_val.grid(row=101, column=i + 1, padx=5, pady=5)
-
-    #     lbl_t = self.__create_label("T")
-    #     lbl_t.grid(row=102, column=0, padx=5, pady=5)
-
-    #     for i in range(len(probs)):
-    #         lbl_t_val = self.__create_label(f"{stable_times[i]:.3f}")
-    #         lbl_t_val.config()
-    #         lbl_t_val.grid(row=102, column=i + 1, padx=5, pady=5)
 
     def clear(self):
         """
