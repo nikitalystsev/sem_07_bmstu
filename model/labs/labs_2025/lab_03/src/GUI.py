@@ -2,7 +2,7 @@
 from tkinter import messagebox
 import tkinter as tk
 import os
-from matplotlib import pyplot as plt
+# from matplotlib import pyplot as plt
 from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
 # from torch.linalg import solve
 from matplotlib.figure import Figure
@@ -16,6 +16,7 @@ from table import Table
 
 # from PointClass import Point
 
+X_COUNT = 1000
 ROOT_DIR = "/home/nikitalystsev/Documents/bmstu/sem_07_bmstu/model/labs/labs_2025/"
 
 
@@ -58,7 +59,7 @@ class MyWindow(tk.Tk):
 
         self._frame_graphs = self.__create_frame(master=self._frame_results)
         self._frame_graphs.config(background="#b0b0b0")
-        self._frame_graphs.pack()
+        self._frame_graphs.pack(fill=tk.X)
 
         # -----------------------------------------------
 
@@ -304,6 +305,7 @@ class MyWindow(tk.Tk):
             activebackground=self.cfgWin.WHITE,
             foreground=self.cfgWin.WHITE,
             borderwidth=0,
+            selectcolor=self.cfgWin.BLACK,
             highlightthickness=0,
             bd=0,
             relief="flat",
@@ -459,14 +461,14 @@ class MyWindow(tk.Tk):
         x_min, x_max = x_ranges
 
         x_list = []
-        uniform_distribution_list = []
-        uniform_distribution_density_list = []
+        F_list = []
+        f_list = []
 
-        step = (x_max - x_min) / 1000
+        step = (x_max - x_min) / X_COUNT
         x = x_min
         while x <= x_max:
-            uniform_distribution_list.append(self._uniform.F(x))
-            uniform_distribution_density_list.append(self._uniform.f(x))
+            F_list.append(self._uniform.F(x))
+            f_list.append(self._uniform.f(x))
             x_list.append(x)
             x += step
 
@@ -477,14 +479,14 @@ class MyWindow(tk.Tk):
         fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
 
         ax1 = fig.add_subplot(121)
-        ax1.plot(x_list, uniform_distribution_list)
+        ax1.plot(x_list, F_list)
         ax1.set_title('Функция распределения F(x)')
         ax1.set_xlabel('x')
         ax1.set_ylabel('F(x)', labelpad=8)
         ax1.grid(True)
 
         ax2 = fig.add_subplot(122)
-        ax2.plot(x_list, uniform_distribution_density_list)
+        ax2.plot(x_list, f_list)
         ax2.set_title('Функция плотности распределения f(x)')
         ax2.set_xlabel('x')
         ax2.set_ylabel('f(x)', labelpad=8)
@@ -591,14 +593,14 @@ class MyWindow(tk.Tk):
         x_min, x_max = x_ranges
 
         x_list = []
-        uniform_distribution_list = []
-        uniform_distribution_density_list = []
+        F_list = []
+        f_list = []
 
-        step = (x_max - x_min) / 1000
+        step = (x_max - x_min) / X_COUNT
         x = x_min
         while x <= x_max:
-            uniform_distribution_list.append(self._erlang.F(x))
-            uniform_distribution_density_list.append(self._erlang.f(x))
+            F_list.append(self._erlang.F(x))
+            f_list.append(self._erlang.f(x))
             x_list.append(x)
             x += step
 
@@ -609,14 +611,14 @@ class MyWindow(tk.Tk):
         fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
 
         ax1 = fig.add_subplot(121)
-        ax1.plot(x_list, uniform_distribution_list)
+        ax1.plot(x_list, F_list)
         ax1.set_title('Функция распределения F(x)')
         ax1.set_xlabel('x')
         ax1.set_ylabel('F(x)', labelpad=8)
         ax1.grid(True)
 
         ax2 = fig.add_subplot(122)
-        ax2.plot(x_list, uniform_distribution_density_list)
+        ax2.plot(x_list, f_list)
         ax2.set_title('Функция плотности распределения f(x)')
         ax2.set_xlabel('x')
         ax2.set_ylabel('f(x)', labelpad=8)
@@ -821,14 +823,14 @@ class MyWindow(tk.Tk):
         x_min, x_max = x_ranges
 
         x_list = []
-        uniform_distribution_list = []
-        uniform_distribution_density_list = []
+        F_list = []
+        f_list = []
 
-        step = (x_max - x_min) / 1000
+        step = (x_max - x_min) / X_COUNT
         x = x_min
         while x <= x_max:
-            uniform_distribution_list.append(self._exponential.F(x))
-            uniform_distribution_density_list.append(self._exponential.f(x))
+            F_list.append(self._exponential.F(x))
+            f_list.append(self._exponential.f(x))
             x_list.append(x)
             x += step
 
@@ -839,14 +841,14 @@ class MyWindow(tk.Tk):
         fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
 
         ax1 = fig.add_subplot(121)
-        ax1.plot(x_list, uniform_distribution_list)
+        ax1.plot(x_list, F_list)
         ax1.set_title('Функция распределения F(x)')
         ax1.set_xlabel('x')
         ax1.set_ylabel('F(x)', labelpad=8)
         ax1.grid(True)
 
         ax2 = fig.add_subplot(122)
-        ax2.plot(x_list, uniform_distribution_density_list)
+        ax2.plot(x_list, f_list)
         ax2.set_title('Функция плотности распределения f(x)')
         ax2.set_xlabel('x')
         ax2.set_ylabel('f(x)', labelpad=8)
@@ -949,14 +951,14 @@ class MyWindow(tk.Tk):
         x_min, x_max = x_ranges
 
         x_list = []
-        uniform_distribution_list = []
-        uniform_distribution_density_list = []
+        F_list = []
+        f_list = []
 
-        step = (x_max - x_min) / 1000
+        step = (x_max - x_min) / X_COUNT
         x = x_min
         while x <= x_max:
-            uniform_distribution_list.append(self._normal.F(x))
-            uniform_distribution_density_list.append(self._normal.f(x))
+            F_list.append(self._normal.F(x))
+            f_list.append(self._normal.f(x))
             x_list.append(x)
             x += step
 
@@ -967,14 +969,14 @@ class MyWindow(tk.Tk):
         fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
 
         ax1 = fig.add_subplot(121)
-        ax1.plot(x_list, uniform_distribution_list)
+        ax1.plot(x_list, F_list)
         ax1.set_title('Функция распределения F(x)')
         ax1.set_xlabel('x')
         ax1.set_ylabel('F(x)', labelpad=8)
         ax1.grid(True)
 
         ax2 = fig.add_subplot(122)
-        ax2.plot(x_list, uniform_distribution_density_list)
+        ax2.plot(x_list, f_list)
         ax2.set_title('Функция плотности распределения f(x)')
         ax2.set_xlabel('x')
         ax2.set_ylabel('f(x)', labelpad=8)
