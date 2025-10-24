@@ -25,7 +25,7 @@ class DistributionParamsFrame(tk.Frame):
 
         for i, (name) in enumerate(self.parameters):
             label_name = tk.Label(self, text=name, font=(
-                ConfigGUI.FONT, 18, ConfigGUI.FONT_STYLE), justify='center', background="#3D517F")
+                ConfigGUI.FONT, 18, ConfigGUI.FONT_STYLE), justify='center', background="#3D517F", foreground=ConfigGUI.WHITE)
             label_name.grid(row=i, column=0, columnspan=2,
                             sticky="wens", padx=10, pady=5)
 

@@ -11,7 +11,7 @@ import config_GUI as cfg
 
 import checks
 from distribution_params_frame import DistributionParamsFrame
-from distributions import UniformDistribution, PoissonDistribution, ExponentialDistribution, NormalDistribution
+from distributions import UniformDistribution, PoissonDistribution, ExponentialDistribution, NormalDistribution, ErlangDistribution
 from table import Table
 
 # from PointClass import Point
@@ -32,7 +32,7 @@ class MyWindow(tk.Tk):
 
         self.cfgWin = cfg.ConfigGUI()
 
-        self.title("Лабораторная №2, Лысцев Никита ИУ7-73Б")
+        self.title("Лабораторная №3, Лысцев Никита ИУ7-73Б")
 
         root_width = 1600
         root_height = 900
@@ -74,6 +74,7 @@ class MyWindow(tk.Tk):
         self._poisson = PoissonDistribution(0)  # also random param
         self._exponential = ExponentialDistribution(0)  # absolutely random
         self._normal = NormalDistribution(0, 1)  # randomly
+        self._erlang = ErlangDistribution(0, 0)  # exactly random
         # -----------------------------------------------
 
         # widgets
@@ -246,7 +247,9 @@ class MyWindow(tk.Tk):
             text=text,
             font=(self.cfgWin.FONT, self.cfgWin.FONT_SIZE,
                   self.cfgWin.FONT_STYLE),  # default
+            foreground=self.cfgWin.WHITE,
             background=self.cfgWin.WHITE,
+
         )
 
         return label
@@ -298,7 +301,8 @@ class MyWindow(tk.Tk):
             variable=var,
             font=(self.cfgWin.FONT, 18, self.cfgWin.FONT_STYLE),
             background="#3D517F",
-            activebackground="#b0b0b0",
+            activebackground=self.cfgWin.WHITE,
+            foreground=self.cfgWin.WHITE,
             borderwidth=0,
             highlightthickness=0,
             bd=0,
@@ -532,6 +536,138 @@ class MyWindow(tk.Tk):
         """
         self.__draw_uniform_distribution_graphs()
         self.__draw_uniform_expectation_and_variance()
+
+    def __get_erlang_k_lamb(self):
+        """
+        Метод получает параметры k и λ распределения Эрланга
+        """
+        values = self._frame_distribution_params.get_values()
+        k = values["k"]
+        lamb = values["λ"]
+
+        if not self.__is_number(k) or not self.__is_number(lamb):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести параметры k и λ распределения Эрланга"
+            )
+            return
+
+        _k, _lamb = 0, 0
+
+        if checks.check_int(k):
+            _k = int(k)
+        else:
+            messagebox.showerror(
+                "Ошибка!",
+                "k - целое число"
+            )
+            return
+
+        if checks.check_float(lamb):
+            _lamb = int(lamb)
+        else:
+            _lamb = float(lamb)
+
+        if (_lamb <= 0):
+            messagebox.showwarning(
+                "Ошибка!",
+                "λ > 0"
+            )
+            return
+
+        return _k, _lamb
+
+    def __draw_erlang_distribution_graphs(self):
+        params = self.__get_erlang_k_lamb()
+        if params is None:
+            return
+
+        self._erlang.set_params(*params)
+
+        x_ranges = self.__get_interval_x_min_x_max()
+        if x_ranges is None:
+            return
+
+        x_min, x_max = x_ranges
+
+        x_list = []
+        uniform_distribution_list = []
+        uniform_distribution_density_list = []
+
+        step = (x_max - x_min) / 1000
+        x = x_min
+        while x <= x_max:
+            uniform_distribution_list.append(self._erlang.F(x))
+            uniform_distribution_density_list.append(self._erlang.f(x))
+            x_list.append(x)
+            x += step
+
+        for widget in self._frame_graphs.winfo_children():
+            widget.destroy()
+
+        # Сделаем фигуру шире и включим constrained_layout
+        fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
+
+        ax1 = fig.add_subplot(121)
+        ax1.plot(x_list, uniform_distribution_list)
+        ax1.set_title('Функция распределения F(x)')
+        ax1.set_xlabel('x')
+        ax1.set_ylabel('F(x)', labelpad=8)
+        ax1.grid(True)
+
+        ax2 = fig.add_subplot(122)
+        ax2.plot(x_list, uniform_distribution_density_list)
+        ax2.set_title('Функция плотности распределения f(x)')
+        ax2.set_xlabel('x')
+        ax2.set_ylabel('f(x)', labelpad=8)
+        ax2.grid(True)
+
+        # поворот xticks если много меток (опционально)
+        for ax in (ax1, ax2):
+            for lbl in ax.get_xticklabels():
+                lbl.set_rotation(0)
+
+        # Явно увеличим горизонтальный промежуток между субплотами
+        fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
+                            bottom=0.15, wspace=0.35)
+
+        # Сохранение: bbox_inches='tight' чтобы ничего не обрезалось
+        save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "erlang")
+        os.makedirs(save_dir, exist_ok=True)
+        filename = os.path.join(
+            save_dir, f"erlang_{params[0]}_{params[1]}.svg")
+        fig.savefig(filename, format="svg",
+                    bbox_inches='tight', pad_inches=0.02)
+
+        # Встраиваем в tkinter Frame
+        canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
+        canvas.draw()
+        canvas.get_tk_widget().pack(fill="both", expand=True)
+
+    def __draw_erlang_expectation_and_variance(self):
+        """
+        метод будет создавать таблицу с мат ожиданием и дисперсией случайной величины
+        """
+        params = self.__get_erlang_k_lamb()
+        if params is None:
+            return
+
+        self._erlang.set_params(*params)
+
+        self._table.create_and_place_table(2, 1, ["M[X]", "D[X]"], ["Values"])
+
+        data = [
+            [f"{self._erlang.M(): .3f}"],
+            [f"{self._erlang.D(): .3f}"]
+        ]
+        self._table.set_data(data=data)
+
+    def __draw_erlang_data(self):
+        """
+        Метод выводит данные
+        """
+        self.__draw_erlang_distribution_graphs()
+        self.__draw_erlang_expectation_and_variance()
 
     def __get_poisson_lamb(self):
         """
@@ -901,6 +1037,8 @@ class MyWindow(tk.Tk):
         match distribution_type:
             case self._uniform_distribution:
                 self.__draw_uniform_data()
+            case self._erlang_distribution:
+                self.__draw_erlang_data()
             case self._poisson_distribution:
                 self.__draw_poissom_data()
             case self._exponential_distribution:

@@ -10,7 +10,7 @@ class ConfigGUI:
     FRAME_WIDGET_WIDTH = 400 # в пикселях
     FONT = "helvetica"
     FONT_SIZE = 14
-    FONT_STYLE = 'bold'
+    FONT_STYLE = 'normal'
 
     # entry
     ENTRY_BORDER_WIDTH = 3 # в пикселях
