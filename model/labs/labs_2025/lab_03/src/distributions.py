@@ -70,6 +70,65 @@ class UniformDistribution:
         return self._b
 
 
+class ErlangDistribution:
+    """
+    Класс распределения Эрланга
+    """
+
+    def __init__(self, k: int, lamb: int | float):
+        """
+        Инициализация атрибутов класса
+        """
+        self._k = k
+        self._lamb = lamb
+
+    def F(self, x: int | float):
+        """
+        Метод, возвращающий значение функции распределения
+        """
+        if x < 0:
+            return 0
+
+        right_part = sum([pow(self._lamb * x, i) / math.factorial(i)
+                         for i in range(self._k)])
+
+        return 1 - math.exp((-1) * self._lamb * x) * right_part
+
+    def f(self, x: int | float):
+        """
+        Метод, возвращающий значение функции плотности распределения
+        """
+
+        if x < 0:
+            return 0
+
+        numerator = math.exp((-1) * self._lamb * x) * \
+            self._lamb * pow(self._lamb * x, self._k)
+
+        return numerator / math.factorial(self._k)
+
+    def M(self):
+        """
+        Математическое ожидание
+        """
+
+        return self._k / self._lamb
+
+    def D(self):
+        """
+        Дисперсия
+        """
+
+        return self._k / (self._lamb ** 2)
+
+    def set_params(self, k: int, lamb: int | float):
+        """
+        Сеттер
+        """
+        self._k = k
+        self._lamb = lamb
+
+
 class PoissonDistribution:
     """
     Класс распределения Пуассона
@@ -145,7 +204,7 @@ class ExponentialDistribution:
         Метод, возвращающий значение функции распределения
         """
 
-        if x <= 0:
+        if x < 0:
             return 0
 
         return 1 - math.exp(-self._lamb * x)
@@ -227,56 +286,3 @@ class NormalDistribution:
         """
         self._mu = mu
         self._sigma = sigma
-
-
-class ErlangDistribution:
-    """
-    Класс распределения Эрланга
-    """
-
-    def __init__(self, k: int, lamb: int | float):
-        """
-        Инициализация атрибутов класса
-        """
-        self._k = k
-        self._lamb = lamb
-
-    def F(self, x: int | float):
-        """
-        Метод, возвращающий значение функции распределения
-        """
-        right_part = sum([pow(self._lamb * x, i) / math.factorial(i)
-                         for i in range(self._k)])
-
-        return 1 - math.exp((-1) * self._lamb * x) * right_part
-
-    def f(self, x: int | float):
-        """
-        Метод, возвращающий значение функции плотности распределения
-        """
-
-        numerator = math.exp((-1) * self._lamb * x) * \
-            self._lamb * pow(self._lamb * x, self._k)
-
-        return numerator / math.factorial(self._k)
-
-    def M(self):
-        """
-        Математическое ожидание
-        """
-
-        return self._k / self._lamb
-
-    def D(self):
-        """
-        Дисперсия
-        """
-
-        return self._k / (self._lamb ** 2)
-
-    def set_params(self, k: int, lamb: int | float):
-        """
-        Сеттер
-        """
-        self._k = k
-        self._lamb = lamb

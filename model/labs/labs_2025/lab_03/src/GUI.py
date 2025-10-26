@@ -701,6 +701,59 @@ class MyWindow(tk.Tk):
 
         return _lamb
 
+    # def __draw_poisson_distribution_graphs(self):
+    #     lamb = self.__get_poisson_lamb()
+    #     if lamb is None:
+    #         return
+
+    #     self._poisson.set_lambda(lamb)
+
+    #     x_ranges = self.__get_interval_x_min_x_max()
+    #     if x_ranges is None:
+    #         return
+
+    #     x_min, x_max = x_ranges
+    #     x_min = max(0, int(x_min))  # Пуассон >= 0
+    #     x_max = int(x_max)
+
+    #     x_list = list(range(x_min, x_max + 1))
+    #     cdf_list = [self._poisson.F(x) for x in x_list]
+    #     pmf_list = [self._poisson.p(x) for x in x_list]
+
+    #     for widget in self._frame_graphs.winfo_children():
+    #         widget.destroy()
+
+    #     fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
+
+    #     # CDF график (ступенчатый)
+    #     ax1 = fig.add_subplot(121)
+    #     ax1.step(x_list, cdf_list, where='post')
+    #     ax1.set_title('Функция распределения F(x)')
+    #     ax1.set_xlabel('x')
+    #     ax1.set_ylabel('F(x)', labelpad=8)
+    #     ax1.grid(True)
+
+    #     # PMF график (дискретные точки)
+    #     ax2 = fig.add_subplot(122)
+    #     ax2.scatter(x_list, pmf_list, color='red', s=40)  # s — размер точек
+    #     ax2.set_title('Функция вероятности p(x)')
+    #     ax2.set_xlabel('x')
+    #     ax2.set_ylabel('P(X=x)', labelpad=8)
+    #     ax2.grid(True, axis='y')
+
+    #     fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
+    #                         bottom=0.15, wspace=0.35)
+
+    #     save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "poisson")
+    #     os.makedirs(save_dir, exist_ok=True)
+    #     filename = os.path.join(save_dir, f"poisson_{lamb}.svg")
+    #     fig.savefig(filename, format="svg",
+    #                 bbox_inches='tight', pad_inches=0.02)
+
+    #     canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
+    #     canvas.draw()
+    #     canvas.get_tk_widget().pack(fill="both", expand=True)
+
     def __draw_poisson_distribution_graphs(self):
         lamb = self.__get_poisson_lamb()
         if lamb is None:
@@ -717,29 +770,40 @@ class MyWindow(tk.Tk):
         x_max = int(x_max)
 
         x_list = list(range(x_min, x_max + 1))
-        cdf_list = [self._poisson.F(x) for x in x_list]
         pmf_list = [self._poisson.p(x) for x in x_list]
+        cdf_list = [self._poisson.F(x) for x in x_list]
 
         for widget in self._frame_graphs.winfo_children():
             widget.destroy()
 
         fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
 
-        # CDF график (ступенчатый)
+        # --- CDF (ступенчатый, дискретный) ---
         ax1 = fig.add_subplot(121)
-        ax1.step(x_list, cdf_list, where='post')
+        # чтобы ступеньки корректно доходили до следующего целого, дополним точки правой границей
+        x_step = x_list + [x_list[-1] + 1]
+        cdf_step = cdf_list + [cdf_list[-1]]
+        ax1.step(x_step, cdf_step, where='post')
         ax1.set_title('Функция распределения F(x)')
         ax1.set_xlabel('x')
         ax1.set_ylabel('F(x)', labelpad=8)
+        ax1.set_xticks(x_list)            # целочисленные метки
+        ax1.set_xlim(x_min - 0.5, x_max + 0.5)
+        ax1.set_ylim(0.0, 1.05)
         ax1.grid(True)
 
-        # PMF график (дискретные точки)
+        # --- PMF (точки) ---
         ax2 = fig.add_subplot(122)
-        ax2.scatter(x_list, pmf_list, color='red', s=40)  # s — размер точек
+        ax2.scatter(x_list, pmf_list, color='red', s=50, zorder=3)
+        # можно добавить соединяющую пунктирную линию, чтобы визуально не "плавало"
+        ax2.plot(x_list, pmf_list, linestyle='dotted', color='gray', zorder=2)
+
         ax2.set_title('Функция вероятности p(x)')
         ax2.set_xlabel('x')
         ax2.set_ylabel('P(X=x)', labelpad=8)
-        ax2.grid(True, axis='y')
+        ax2.set_xticks(x_list)
+        ax2.set_xlim(x_min - 0.5, x_max + 0.5)
+        ax2.grid(True, axis='y', linestyle='--', alpha=0.6)
 
         fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
                             bottom=0.15, wspace=0.35)
