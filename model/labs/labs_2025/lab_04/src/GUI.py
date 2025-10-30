@@ -7,7 +7,7 @@ import config_GUI as cfg
 
 from distribution_params_frame import DistributionParamsFrame
 from distributions import UniformDistribution, PoissonDistribution, ExponentialDistribution, NormalDistribution, ErlangDistribution
-from queue_system_params import QueueSystemParamsFrame
+from queue_system_params_frame import QueueSystemParamsFrame
 
 
 class MyWindow(tk.Tk):
