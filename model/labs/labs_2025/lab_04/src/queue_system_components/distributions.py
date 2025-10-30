@@ -1,4 +1,5 @@
 import math
+import random
 
 X_COUNT = 100
 
@@ -49,6 +50,13 @@ class UniformDistribution:
         """
 
         return (self._b - self._a) ** 2 / 12
+
+    def t_i(self):
+        """
+        Метод возвращает момент времени t_i
+        """
+
+        return self._a + (self._b - self._a) * random.random()
 
     def set_params(self, a: int | float, b: int | float) -> None:
         """
@@ -121,6 +129,12 @@ class ErlangDistribution:
 
         return self._k / (self._lamb ** 2)
 
+    def t_i(self):
+        """
+        Метод возвращает момент времени t_i
+        """
+        return 0.0
+
     def set_params(self, k: int, lamb: int | float):
         """
         Сеттер
@@ -181,6 +195,12 @@ class PoissonDistribution:
 
         return self._lamb
 
+    def t_i(self):
+        """
+        Метод возвращает момент времени t_i
+        """
+        return 0.0
+
     def set_lambda(self, lamb: int | float):
         """
         Сеттер
@@ -233,6 +253,12 @@ class ExponentialDistribution:
 
         return 2 / (self._lamb ** 2)
 
+    def t_i(self):
+        """
+        Метод возвращает момент времени t_i
+        """
+        return 0.0
+
     def set_lambda(self, lamb: int | float):
         """
         Сеттер
@@ -279,6 +305,12 @@ class NormalDistribution:
         """
 
         return self._sigma ** 2
+
+    def t_i(self):
+        """
+        Метод возвращает момент времени t_i
+        """
+        return 0.0
 
     def set_params(self, mu: int | float, sigma: int | float):
         """

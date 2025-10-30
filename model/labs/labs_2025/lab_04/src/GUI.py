@@ -6,7 +6,7 @@ import tkinter.ttk as ttk
 import config_GUI as cfg
 
 from distribution_params_frame import DistributionParamsFrame
-from distributions import UniformDistribution, PoissonDistribution, ExponentialDistribution, NormalDistribution, ErlangDistribution
+from queue_system_components.distributions import UniformDistribution, PoissonDistribution, ExponentialDistribution, NormalDistribution, ErlangDistribution
 from queue_system_params_frame import QueueSystemParamsFrame
 
 
@@ -63,6 +63,13 @@ class MyWindow(tk.Tk):
         self._frame_queue_system_params.config(background="#3D517F")
         self._frame_queue_system_params.grid(
             row=15, column=2, rowspan=2, columnspan=2, sticky='wens')
+
+        self._frame_count_tasks = DistributionParamsFrame(
+            self._frame_widgets)
+        self._frame_count_tasks.config(background="#3D517F")
+        self._frame_count_tasks.grid(
+            row=17, column=0, columnspan=2, sticky='wens', pady=10
+        )
 
         self._frame_results = self.__create_frame(master=self)
         self._frame_results.config(background="#b0b0b0")
@@ -328,7 +335,11 @@ class MyWindow(tk.Tk):
         )
         # default time advance params
         self._frame_queue_system_params.set_parameters(
-            parameters=[("Процент возврата:")]
+            parameters=[("Процент возврата")]
+        )
+
+        self._frame_count_tasks.set_parameters(
+            parameters=[("Число заявок")]
         )
 
         self._combobox_queue_system_type.bind(
@@ -346,7 +357,7 @@ class MyWindow(tk.Tk):
             background=self.cfgWin.WHITE,
         )
         self._btn_calc.grid(
-            row=17, column=0, columnspan=4,
+            row=17, column=2, columnspan=2,
             sticky='wens', padx=10, pady=15
         )
 
