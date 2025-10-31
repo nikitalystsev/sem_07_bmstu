@@ -110,6 +110,7 @@ class EventApproach:
 
         return self._buffer_memory.get_max_queue_len()
 
+
 class DeltaTApproach:
     """
     Класс, реализующий принцип Δt протяжки модельного времени
@@ -137,25 +138,30 @@ class DeltaTApproach:
         # процент заявок, что будут повторно обработаны
         self._repeat_percent = repeat_percent
 
+        print(f"self._count_tasks = {self._count_tasks}")
+        print(f"self._delta_t = {self._delta_t}")
+        print(f"self._repeat_percent = {self._repeat_percent}")
+
     def run(self):
         """
         Метод реализующий принцип Δt
         """
+        self._server.set_state("free")
         count_tasks_processed = 0  # сколько заявок обработано
 
         # время освобождения ОА после обработки первой заявки (пока неизвестно)
-        server_time = 0
+        server_time = -1
 
         # получаем время прихода первой заявки от ИИ
         new_task_time = self._generator.gen_next_task_time()
-
-        prev_task_time = 0  # время прихода предыдущей заявки
 
         curr_time = self._delta_t
 
         empty_generated = None
 
         while count_tasks_processed < self._count_tasks:  # пока все заявки не будут обработаны
+            # print("[+] loop...")
+            # print(f"count_tasks_processed = {count_tasks_processed}")
             if curr_time > new_task_time:  # если текущее время больше чем время появления новой заявки
                 if self._server.is_free() and self._buffer_memory.is_empty():
                     empty_generated = True
@@ -163,13 +169,13 @@ class DeltaTApproach:
                 self._buffer_memory.write_request(curr_time)
                 # нужно сгенерить время прихода след заявки
                 prev_task_time = new_task_time
-                new_task_time = new_task_time + self._generator.gen_next_task_time()
+                new_task_time = prev_task_time + self._generator.gen_next_task_time()
 
             if 0 < server_time < curr_time:  # если текущее время больше чем время освобождения ОА после обработки очередной заявки
                 self._server.set_state("free")  # ОА стал свободным
 
                 # некоторый процент заявок снова пойдет на вход
-                if random.randint(1, 100) < self._repeat_percent:
+                if random.randint(0, 100) < self._repeat_percent:
                     self._buffer_memory.write_request(0)
 
                 count_tasks_processed += 1
@@ -189,3 +195,13 @@ class DeltaTApproach:
 
             empty_generated = False
             curr_time += self._delta_t  # продвигаем модельное время
+
+        print("\nSTEP MODEL")
+        print(f"Repeat: {self._repeat_percent}")
+        print(f"Requests: {self._count_tasks}")
+        # print(f"Repeats: {total_requests - self.requests_num}")
+        print(f"Time: {curr_time - self._delta_t}")
+        print(f"delta_t: {self._delta_t}")
+        print(f"Max len: {self._buffer_memory.get_max_queue_len()}")
+
+        return self._buffer_memory.get_max_queue_len()

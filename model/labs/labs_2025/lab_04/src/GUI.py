@@ -1040,7 +1040,7 @@ class MyWindow(tk.Tk):
 
         if queue_len is None:
             return
-        
+
         match time_advance_alg:
             case self._event_approach:
                 self._table.create_and_place_table(1, 1, ["Событийный принцип"], [
@@ -1053,7 +1053,7 @@ class MyWindow(tk.Tk):
                     "Ошибка!",
                     "Выбран неизвестный алгоритм протяжки модельного времени!"
                 )
-                
+
         self._table.set_data([[f"{queue_len}"]])
 
         return server
@@ -1089,7 +1089,7 @@ class MyWindow(tk.Tk):
         else:
             _a = float(a)
 
-        if checks.check_float(b):
+        if checks.check_int(b):
             _b = int(b)
         else:
             _b = float(b)
@@ -1225,7 +1225,7 @@ class MyWindow(tk.Tk):
         else:
             _mu = float(mu)
 
-        if checks.check_float(sigma):
+        if checks.check_int(sigma):
             _sigma = int(sigma)
         else:
             _sigma = float(sigma)

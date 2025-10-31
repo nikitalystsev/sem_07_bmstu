@@ -133,7 +133,11 @@ class ErlangDistribution:
         """
         Метод возвращает момент времени t_i
         """
-        return 0.0
+        _sum = 0
+        for _ in range(self._k):
+            _sum += (1 / self._lamb) * math.log(1 - random.random())
+
+        return - (1 / self._k) * _sum
 
     def set_params(self, k: int, lamb: int | float):
         """
@@ -199,7 +203,16 @@ class PoissonDistribution:
         """
         Метод возвращает момент времени t_i
         """
-        return 0.0
+        _exp = math.exp(-self._lamb)
+
+        x = 0
+
+        r_i = 1
+        while r_i > _exp:
+            x += 1
+            r_i *= random.random()
+
+        return x - 1
 
     def set_lambda(self, lamb: int | float):
         """
@@ -257,7 +270,8 @@ class ExponentialDistribution:
         """
         Метод возвращает момент времени t_i
         """
-        return 0.0
+
+        return -(1 / self._lamb) * math.log(1 - random.random())
 
     def set_lambda(self, lamb: int | float):
         """
@@ -309,8 +323,13 @@ class NormalDistribution:
     def t_i(self):
         """
         Метод возвращает момент времени t_i
+        n = 12
         """
-        return 0.0
+        _sum = 0
+        for _ in range(6):
+            _sum += random.random()
+
+        return self._sigma * (_sum - 6) + self._mu
 
     def set_params(self, mu: int | float, sigma: int | float):
         """
