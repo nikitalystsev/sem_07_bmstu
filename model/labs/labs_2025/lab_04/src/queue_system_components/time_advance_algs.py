@@ -196,12 +196,4 @@ class DeltaTApproach:
             empty_generated = False
             curr_time += self._delta_t  # продвигаем модельное время
 
-        print("\nSTEP MODEL")
-        print(f"Repeat: {self._repeat_percent}")
-        print(f"Requests: {self._count_tasks}")
-        # print(f"Repeats: {total_requests - self.requests_num}")
-        print(f"Time: {curr_time - self._delta_t}")
-        print(f"delta_t: {self._delta_t}")
-        print(f"Max len: {self._buffer_memory.get_max_queue_len()}")
-
         return self._buffer_memory.get_max_queue_len()
