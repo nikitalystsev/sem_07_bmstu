@@ -9,6 +9,15 @@ from distribution_params_frame import DistributionParamsFrame
 from queue_system_components.distributions import UniformDistribution, PoissonDistribution, ExponentialDistribution, NormalDistribution, ErlangDistribution
 from queue_system_params_frame import QueueSystemParamsFrame
 
+from queue_system_components.time_advance_algs import EventApproach, DeltaTApproach
+from queue_system_components.generator import Generator
+from queue_system_components.server import Server
+from queue_system_components.buffer_memory import BufferMemory
+
+from table import Table
+
+import checks
+
 
 class MyWindow(tk.Tk):
     """
@@ -355,15 +364,16 @@ class MyWindow(tk.Tk):
         self._btn_calc.config(
             font=(self.cfgWin.FONT, 18, self.cfgWin.FONT_STYLE),
             background=self.cfgWin.WHITE,
+            command=self.__run_simulation
         )
         self._btn_calc.grid(
             row=17, column=2, columnspan=2,
             sticky='wens', padx=10, pady=15
         )
 
-        # self._table = Table(master=self._frame_results)
-        # self._table.config(background="#b0b0b0")
-        # self._table.pack(pady=15)
+        self._table = Table(master=self._frame_results)
+        self._table.config(background="#b0b0b0")
+        self._table.pack(pady=15)
 
     # def __create_display(self, master: tk.Tk | tk.Frame) -> intensity_matrix.Display:
     #     """
@@ -627,752 +637,604 @@ class MyWindow(tk.Tk):
                     "Ошибка!",
                     "Выбран неизвестный закон распределения!"
                 )
-    # def __is_number(self, x: str) -> bool:
-    #     """
-    #     Метод проверка введенного значения на число
-    #     """
-    #     if checks.check_int(x) or checks.check_float(x):
-    #         return True
-
-    #     return False
-
-    # def __get_interval_x_min_x_max(self):
-    #     """
-    #     Метод получает интервал по оси Ox для вывода графиков
-    #     """
-    #     x_min = self._entry_input_x_min.get()
-    #     x_max = self._entry_input_x_max.get()
-
-    #     if not self.__is_number(x_min) or not self.__is_number(x_max):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "Необходимо ввести интервал по оси Ox для вывода графиков"
-    #         )
-    #         return
-
-    #     _x_min, _x_max = 0, 0
-
-    #     if checks.check_int(x_min):
-    #         _x_min = int(x_min)
-    #     else:
-    #         _x_min = float(x_min)
-
-    #     if checks.check_float(x_max):
-    #         _x_max = int(x_max)
-    #     else:
-    #         _x_max = float(x_max)
-
-    #     if (_x_min >= _x_max):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "x_min <= x_max"
-    #         )
-    #         return
-
-    #     return _x_min, _x_max
-
-    # def __get_uniform_a_b(self):
-    #     """
-    #     Метод получает параметры a и b равномерного распределения
-    #     """
-    #     values = self._frame_distribution_params.get_values()
-    #     a = values["a"]
-    #     b = values["b"]
-
-    #     if not self.__is_number(a) or not self.__is_number(b):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "Необходимо ввести параметры a и b равномерного распределения"
-    #         )
-    #         return
-
-    #     _a, _b = 0, 0
-
-    #     if checks.check_int(a):
-    #         _a = int(a)
-    #     else:
-    #         _a = float(a)
-
-    #     if checks.check_float(b):
-    #         _b = int(b)
-    #     else:
-    #         _b = float(b)
-
-    #     if (_a >= _b):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "a <= b"
-    #         )
-    #         return
-
-    #     return _a, _b
-
-    # def __draw_uniform_distribution_graphs(self):
-    #     params = self.__get_uniform_a_b()
-    #     if params is None:
-    #         return
-
-    #     self._uniform.set_params(*params)
-
-    #     x_ranges = self.__get_interval_x_min_x_max()
-    #     if x_ranges is None:
-    #         return
-
-    #     x_min, x_max = x_ranges
-
-    #     x_list = []
-    #     F_list = []
-    #     f_list = []
-
-    #     step = (x_max - x_min) / X_COUNT
-    #     x = x_min
-    #     while x <= x_max:
-    #         F_list.append(self._uniform.F(x))
-    #         f_list.append(self._uniform.f(x))
-    #         x_list.append(x)
-    #         x += step
-
-    #     for widget in self._frame_graphs.winfo_children():
-    #         widget.destroy()
-
-    #     # Сделаем фигуру шире и включим constrained_layout
-    #     fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
-
-    #     ax1 = fig.add_subplot(121)
-    #     ax1.plot(x_list, F_list)
-    #     ax1.set_title('Функция распределения F(x)')
-    #     ax1.set_xlabel('x')
-    #     ax1.set_ylabel('F(x)', labelpad=8)
-    #     ax1.grid(True)
-
-    #     ax2 = fig.add_subplot(122)
-    #     ax2.plot(x_list, f_list)
-    #     ax2.set_title('Функция плотности распределения f(x)')
-    #     ax2.set_xlabel('x')
-    #     ax2.set_ylabel('f(x)', labelpad=8)
-    #     ax2.grid(True)
-
-    #     # поворот xticks если много меток (опционально)
-    #     for ax in (ax1, ax2):
-    #         for lbl in ax.get_xticklabels():
-    #             lbl.set_rotation(0)
-
-    #     # Явно увеличим горизонтальный промежуток между субплотами
-    #     fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
-    #                         bottom=0.15, wspace=0.35)
-
-    #     # Сохранение: bbox_inches='tight' чтобы ничего не обрезалось
-    #     save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "uniform")
-    #     os.makedirs(save_dir, exist_ok=True)
-    #     filename = os.path.join(
-    #         save_dir, f"ud_{self._uniform.get_a()}_{self._uniform.get_b()}.svg")
-    #     fig.savefig(filename, format="svg",
-    #                 bbox_inches='tight', pad_inches=0.02)
-
-    #     # Встраиваем в tkinter Frame
-    #     canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
-    #     canvas.draw()
-    #     canvas.get_tk_widget().pack(fill="both", expand=True)
-
-    # def __draw_uniform_expectation_and_variance(self):
-    #     """
-    #     метод будет создавать таблицу с мат ожиданием и дисперсией случайной величины
-    #     """
-    #     params = self.__get_uniform_a_b()
-    #     if params is None:
-    #         return
-
-    #     self._uniform.set_params(*params)
-
-    #     self._table.create_and_place_table(2, 1, ["M[X]", "D[X]"], ["Values"])
-
-    #     data = [
-    #         [f"{self._uniform.M(): .3f}"],
-    #         [f"{self._uniform.D(): .3f}"]
-    #     ]
-    #     self._table.set_data(data=data)
-
-    # def __draw_uniform_data(self):
-    #     """
-    #     Метод выводит данные
-    #     """
-    #     self.__draw_uniform_distribution_graphs()
-    #     self.__draw_uniform_expectation_and_variance()
-
-    # def __get_erlang_k_lamb(self):
-    #     """
-    #     Метод получает параметры k и λ распределения Эрланга
-    #     """
-    #     values = self._frame_distribution_params.get_values()
-    #     k = values["k"]
-    #     lamb = values["λ"]
-
-    #     if not self.__is_number(k) or not self.__is_number(lamb):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "Необходимо ввести параметры k и λ распределения Эрланга"
-    #         )
-    #         return
-
-    #     _k, _lamb = 0, 0
-
-    #     if checks.check_int(k):
-    #         _k = int(k)
-    #     else:
-    #         messagebox.showerror(
-    #             "Ошибка!",
-    #             "k - целое число"
-    #         )
-    #         return
-
-    #     if checks.check_float(lamb):
-    #         _lamb = int(lamb)
-    #     else:
-    #         _lamb = float(lamb)
-
-    #     if (_lamb <= 0):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "λ > 0"
-    #         )
-    #         return
-
-    #     return _k, _lamb
-
-    # def __draw_erlang_distribution_graphs(self):
-    #     params = self.__get_erlang_k_lamb()
-    #     if params is None:
-    #         return
-
-    #     self._erlang.set_params(*params)
-
-    #     x_ranges = self.__get_interval_x_min_x_max()
-    #     if x_ranges is None:
-    #         return
-
-    #     x_min, x_max = x_ranges
-
-    #     x_list = []
-    #     F_list = []
-    #     f_list = []
-
-    #     step = (x_max - x_min) / X_COUNT
-    #     x = x_min
-    #     while x <= x_max:
-    #         F_list.append(self._erlang.F(x))
-    #         f_list.append(self._erlang.f(x))
-    #         x_list.append(x)
-    #         x += step
-
-    #     for widget in self._frame_graphs.winfo_children():
-    #         widget.destroy()
-
-    #     # Сделаем фигуру шире и включим constrained_layout
-    #     fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
-
-    #     ax1 = fig.add_subplot(121)
-    #     ax1.plot(x_list, F_list)
-    #     ax1.set_title('Функция распределения F(x)')
-    #     ax1.set_xlabel('x')
-    #     ax1.set_ylabel('F(x)', labelpad=8)
-    #     ax1.grid(True)
-
-    #     ax2 = fig.add_subplot(122)
-    #     ax2.plot(x_list, f_list)
-    #     ax2.set_title('Функция плотности распределения f(x)')
-    #     ax2.set_xlabel('x')
-    #     ax2.set_ylabel('f(x)', labelpad=8)
-    #     ax2.grid(True)
-
-    #     # поворот xticks если много меток (опционально)
-    #     for ax in (ax1, ax2):
-    #         for lbl in ax.get_xticklabels():
-    #             lbl.set_rotation(0)
-
-    #     # Явно увеличим горизонтальный промежуток между субплотами
-    #     fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
-    #                         bottom=0.15, wspace=0.35)
-
-    #     # Сохранение: bbox_inches='tight' чтобы ничего не обрезалось
-    #     save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "erlang")
-    #     os.makedirs(save_dir, exist_ok=True)
-    #     filename = os.path.join(
-    #         save_dir, f"erlang_{params[0]}_{params[1]}.svg")
-    #     fig.savefig(filename, format="svg",
-    #                 bbox_inches='tight', pad_inches=0.02)
-
-    #     # Встраиваем в tkinter Frame
-    #     canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
-    #     canvas.draw()
-    #     canvas.get_tk_widget().pack(fill="both", expand=True)
-
-    # def __draw_erlang_expectation_and_variance(self):
-    #     """
-    #     метод будет создавать таблицу с мат ожиданием и дисперсией случайной величины
-    #     """
-    #     params = self.__get_erlang_k_lamb()
-    #     if params is None:
-    #         return
-
-    #     self._erlang.set_params(*params)
-
-    #     self._table.create_and_place_table(2, 1, ["M[X]", "D[X]"], ["Values"])
-
-    #     data = [
-    #         [f"{self._erlang.M(): .3f}"],
-    #         [f"{self._erlang.D(): .3f}"]
-    #     ]
-    #     self._table.set_data(data=data)
-
-    # def __draw_erlang_data(self):
-    #     """
-    #     Метод выводит данные
-    #     """
-    #     self.__draw_erlang_distribution_graphs()
-    #     self.__draw_erlang_expectation_and_variance()
-
-    # def __get_poisson_lamb(self):
-    #     """
-    #     Метод получает параметр λ распределения Пуассона
-    #     """
-    #     values = self._frame_distribution_params.get_values()
-    #     lamb = values["λ"]
-
-    #     if not self.__is_number(lamb):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "Необходимо ввести параметр λ распределения Пуассона"
-    #         )
-    #         return
-
-    #     _lamb = 0
-
-    #     if checks.check_int(lamb):
-    #         _lamb = int(lamb)
-    #     else:
-    #         _lamb = float(lamb)
-
-    #     if (_lamb <= 0):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "λ > 0"
-    #         )
-    #         return
-
-    #     return _lamb
-
-    # # def __draw_poisson_distribution_graphs(self):
-    # #     lamb = self.__get_poisson_lamb()
-    # #     if lamb is None:
-    # #         return
-
-    # #     self._poisson.set_lambda(lamb)
-
-    # #     x_ranges = self.__get_interval_x_min_x_max()
-    # #     if x_ranges is None:
-    # #         return
-
-    # #     x_min, x_max = x_ranges
-    # #     x_min = max(0, int(x_min))  # Пуассон >= 0
-    # #     x_max = int(x_max)
-
-    # #     x_list = list(range(x_min, x_max + 1))
-    # #     cdf_list = [self._poisson.F(x) for x in x_list]
-    # #     pmf_list = [self._poisson.p(x) for x in x_list]
-
-    # #     for widget in self._frame_graphs.winfo_children():
-    # #         widget.destroy()
-
-    # #     fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
-
-    # #     # CDF график (ступенчатый)
-    # #     ax1 = fig.add_subplot(121)
-    # #     ax1.step(x_list, cdf_list, where='post')
-    # #     ax1.set_title('Функция распределения F(x)')
-    # #     ax1.set_xlabel('x')
-    # #     ax1.set_ylabel('F(x)', labelpad=8)
-    # #     ax1.grid(True)
-
-    # #     # PMF график (дискретные точки)
-    # #     ax2 = fig.add_subplot(122)
-    # #     ax2.scatter(x_list, pmf_list, color='red', s=40)  # s — размер точек
-    # #     ax2.set_title('Функция вероятности p(x)')
-    # #     ax2.set_xlabel('x')
-    # #     ax2.set_ylabel('P(X=x)', labelpad=8)
-    # #     ax2.grid(True, axis='y')
-
-    # #     fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
-    # #                         bottom=0.15, wspace=0.35)
-
-    # #     save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "poisson")
-    # #     os.makedirs(save_dir, exist_ok=True)
-    # #     filename = os.path.join(save_dir, f"poisson_{lamb}.svg")
-    # #     fig.savefig(filename, format="svg",
-    # #                 bbox_inches='tight', pad_inches=0.02)
-
-    # #     canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
-    # #     canvas.draw()
-    # #     canvas.get_tk_widget().pack(fill="both", expand=True)
-
-    # def __draw_poisson_distribution_graphs(self):
-    #     lamb = self.__get_poisson_lamb()
-    #     if lamb is None:
-    #         return
-
-    #     self._poisson.set_lambda(lamb)
-
-    #     x_ranges = self.__get_interval_x_min_x_max()
-    #     if x_ranges is None:
-    #         return
-
-    #     x_min, x_max = x_ranges
-    #     x_min = max(0, int(x_min))  # Пуассон >= 0
-    #     x_max = int(x_max)
-
-    #     x_list = list(range(x_min, x_max + 1))
-    #     pmf_list = [self._poisson.p(x) for x in x_list]
-    #     cdf_list = [self._poisson.F(x) for x in x_list]
-
-    #     for widget in self._frame_graphs.winfo_children():
-    #         widget.destroy()
-
-    #     fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
-
-    #     # --- CDF (ступенчатый, дискретный) ---
-    #     ax1 = fig.add_subplot(121)
-    #     # чтобы ступеньки корректно доходили до следующего целого, дополним точки правой границей
-    #     x_step = x_list + [x_list[-1] + 1]
-    #     cdf_step = cdf_list + [cdf_list[-1]]
-    #     ax1.step(x_step, cdf_step, where='post')
-    #     ax1.set_title('Функция распределения F(x)')
-    #     ax1.set_xlabel('x')
-    #     ax1.set_ylabel('F(x)', labelpad=8)
-    #     ax1.set_xticks(x_list)            # целочисленные метки
-    #     ax1.set_xlim(x_min - 0.5, x_max + 0.5)
-    #     ax1.set_ylim(0.0, 1.05)
-    #     ax1.grid(True)
-
-    #     # --- PMF (точки) ---
-    #     ax2 = fig.add_subplot(122)
-    #     ax2.scatter(x_list, pmf_list, color='red', s=50, zorder=3)
-    #     # можно добавить соединяющую пунктирную линию, чтобы визуально не "плавало"
-    #     ax2.plot(x_list, pmf_list, linestyle='dotted', color='gray', zorder=2)
-
-    #     ax2.set_title('Функция вероятности p(x)')
-    #     ax2.set_xlabel('x')
-    #     ax2.set_ylabel('P(X=x)', labelpad=8)
-    #     ax2.set_xticks(x_list)
-    #     ax2.set_xlim(x_min - 0.5, x_max + 0.5)
-    #     ax2.grid(True, axis='y', linestyle='--', alpha=0.6)
-
-    #     fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
-    #                         bottom=0.15, wspace=0.35)
-
-    #     save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "poisson")
-    #     os.makedirs(save_dir, exist_ok=True)
-    #     filename = os.path.join(save_dir, f"poisson_{lamb}.svg")
-    #     fig.savefig(filename, format="svg",
-    #                 bbox_inches='tight', pad_inches=0.02)
-
-    #     canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
-    #     canvas.draw()
-    #     canvas.get_tk_widget().pack(fill="both", expand=True)
-
-    # def __draw_poisson_expectation_and_variance(self):
-    #     """
-    #     метод будет создавать таблицу с мат ожиданием и дисперсией случайной величины
-    #     """
-    #     lamb = self.__get_poisson_lamb()
-    #     if lamb is None:
-    #         return
-
-    #     self._poisson.set_lambda(lamb)
-
-    #     self._table.create_and_place_table(2, 1, ["M[X]", "D[X]"], ["Values"])
-
-    #     data = [
-    #         [f"{self._poisson.M(): .3f}"],
-    #         [f"{self._poisson.D(): .3f}"]
-    #     ]
-    #     self._table.set_data(data=data)
-
-    # def __draw_poissom_data(self):
-    #     """
-    #     Метод выводит данные
-    #     """
-    #     self.__draw_poisson_distribution_graphs()
-    #     self.__draw_poisson_expectation_and_variance()
-
-    # def __get_exponential_lamb(self):
-    #     """
-    #     Метод получает параметр λ экспоненциального распределения
-    #     """
-    #     values = self._frame_distribution_params.get_values()
-    #     lamb = values["λ"]
-
-    #     if not self.__is_number(lamb):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "Необходимо ввести параметр λ экспоненциального распределения"
-    #         )
-    #         return
-
-    #     _lamb = 0
-
-    #     if checks.check_int(lamb):
-    #         _lamb = int(lamb)
-    #     else:
-    #         _lamb = float(lamb)
-
-    #     if (_lamb <= 0):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "λ > 0"
-    #         )
-    #         return
-
-    #     return _lamb
-
-    # def __draw_exponential_distribution_graphs(self):
-    #     lamb = self.__get_exponential_lamb()
-    #     if lamb is None:
-    #         return
-
-    #     self._exponential.set_lambda(lamb)
-
-    #     x_ranges = self.__get_interval_x_min_x_max()
-    #     if x_ranges is None:
-    #         return
-
-    #     x_min, x_max = x_ranges
-
-    #     x_list = []
-    #     F_list = []
-    #     f_list = []
-
-    #     step = (x_max - x_min) / X_COUNT
-    #     x = x_min
-    #     while x <= x_max:
-    #         F_list.append(self._exponential.F(x))
-    #         f_list.append(self._exponential.f(x))
-    #         x_list.append(x)
-    #         x += step
-
-    #     for widget in self._frame_graphs.winfo_children():
-    #         widget.destroy()
-
-    #     # Сделаем фигуру шире и включим constrained_layout
-    #     fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
-
-    #     ax1 = fig.add_subplot(121)
-    #     ax1.plot(x_list, F_list)
-    #     ax1.set_title('Функция распределения F(x)')
-    #     ax1.set_xlabel('x')
-    #     ax1.set_ylabel('F(x)', labelpad=8)
-    #     ax1.grid(True)
-
-    #     ax2 = fig.add_subplot(122)
-    #     ax2.plot(x_list, f_list)
-    #     ax2.set_title('Функция плотности распределения f(x)')
-    #     ax2.set_xlabel('x')
-    #     ax2.set_ylabel('f(x)', labelpad=8)
-    #     ax2.grid(True)
-
-    #     # поворот xticks если много меток (опционально)
-    #     for ax in (ax1, ax2):
-    #         for lbl in ax.get_xticklabels():
-    #             lbl.set_rotation(0)
-
-    #     # Явно увеличим горизонтальный промежуток между субплотами
-    #     fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
-    #                         bottom=0.15, wspace=0.35)
-
-    #     # Сохранение: bbox_inches='tight' чтобы ничего не обрезалось
-    #     save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "exponential")
-    #     os.makedirs(save_dir, exist_ok=True)
-    #     filename = os.path.join(
-    #         save_dir, f"exp_{lamb}.svg")
-    #     fig.savefig(filename, format="svg",
-    #                 bbox_inches='tight', pad_inches=0.02)
-
-    #     # Встраиваем в tkinter Frame
-    #     canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
-    #     canvas.draw()
-    #     canvas.get_tk_widget().pack(fill="both", expand=True)
-
-    # def __draw_exponential_expectation_and_variance(self):
-    #     """
-    #     метод будет создавать таблицу с мат ожиданием и дисперсией случайной величины
-    #     """
-    #     lamb = self.__get_exponential_lamb()
-    #     if lamb is None:
-    #         return
-
-    #     self._exponential.set_lambda(lamb)
-
-    #     self._table.create_and_place_table(2, 1, ["M[X]", "D[X]"], ["Values"])
-
-    #     data = [
-    #         [f"{self._exponential.M(): .3f}"],
-    #         [f"{self._exponential.D(): .3f}"]
-    #     ]
-    #     self._table.set_data(data=data)
-
-    # def __draw_exponential_data(self):
-    #     """
-    #     Метод выводит данные
-    #     """
-    #     self.__draw_exponential_distribution_graphs()
-    #     self.__draw_exponential_expectation_and_variance()
-
-    # def __get_normal_mu_sigma(self):
-    #     """
-    #     Метод получает параметры μ и σ нормального распределения
-    #     """
-    #     values = self._frame_distribution_params.get_values()
-    #     mu = values["μ"]
-    #     sigma = values["σ"]
-
-    #     if not self.__is_number(mu) or not self.__is_number(sigma):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "Необходимо ввести параметры μ и σ нормального распределения"
-    #         )
-    #         return
-
-    #     _mu, _sigma = 0, 0
-
-    #     if checks.check_int(mu):
-    #         _mu = int(mu)
-    #     else:
-    #         _mu = float(mu)
-
-    #     if checks.check_float(sigma):
-    #         _sigma = int(sigma)
-    #     else:
-    #         _sigma = float(sigma)
-
-    #     if (_sigma <= 0):
-    #         messagebox.showwarning(
-    #             "Ошибка!",
-    #             "σ > 0"
-    #         )
-    #         return
-
-    #     return _mu, _sigma
-
-    # def __draw_normal_distribution_graphs(self):
-    #     params = self.__get_normal_mu_sigma()
-    #     if params is None:
-    #         return
-
-    #     self._normal.set_params(*params)
-
-    #     x_ranges = self.__get_interval_x_min_x_max()
-    #     if x_ranges is None:
-    #         return
-
-    #     x_min, x_max = x_ranges
-
-    #     x_list = []
-    #     F_list = []
-    #     f_list = []
-
-    #     step = (x_max - x_min) / X_COUNT
-    #     x = x_min
-    #     while x <= x_max:
-    #         F_list.append(self._normal.F(x))
-    #         f_list.append(self._normal.f(x))
-    #         x_list.append(x)
-    #         x += step
-
-    #     for widget in self._frame_graphs.winfo_children():
-    #         widget.destroy()
-
-    #     # Сделаем фигуру шире и включим constrained_layout
-    #     fig = Figure(figsize=(11, 3.5), dpi=100, constrained_layout=False)
-
-    #     ax1 = fig.add_subplot(121)
-    #     ax1.plot(x_list, F_list)
-    #     ax1.set_title('Функция распределения F(x)')
-    #     ax1.set_xlabel('x')
-    #     ax1.set_ylabel('F(x)', labelpad=8)
-    #     ax1.grid(True)
-
-    #     ax2 = fig.add_subplot(122)
-    #     ax2.plot(x_list, f_list)
-    #     ax2.set_title('Функция плотности распределения f(x)')
-    #     ax2.set_xlabel('x')
-    #     ax2.set_ylabel('f(x)', labelpad=8)
-    #     ax2.grid(True)
-
-    #     # поворот xticks если много меток (опционально)
-    #     for ax in (ax1, ax2):
-    #         for lbl in ax.get_xticklabels():
-    #             lbl.set_rotation(0)
-
-    #     # Явно увеличим горизонтальный промежуток между субплотами
-    #     fig.subplots_adjust(left=0.06, right=0.98, top=0.92,
-    #                         bottom=0.15, wspace=0.35)
-
-    #     # Сохранение: bbox_inches='tight' чтобы ничего не обрезалось
-    #     save_dir = os.path.join(ROOT_DIR, "lab_03", "data", "normal")
-    #     os.makedirs(save_dir, exist_ok=True)
-    #     filename = os.path.join(
-    #         save_dir, f"normal_{params[0]}_{params[1]}.svg")
-    #     fig.savefig(filename, format="svg",
-    #                 bbox_inches='tight', pad_inches=0.02)
-
-    #     # Встраиваем в tkinter Frame
-    #     canvas = FigureCanvasTkAgg(fig, master=self._frame_graphs)
-    #     canvas.draw()
-    #     canvas.get_tk_widget().pack(fill="both", expand=True)
-
-    # def __draw_normal_expectation_and_variance(self):
-    #     """
-    #     метод будет создавать таблицу с мат ожиданием и дисперсией случайной величины
-    #     """
-    #     params = self.__get_normal_mu_sigma()
-    #     if params is None:
-    #         return
-
-    #     self._normal.set_params(*params)
-
-    #     self._table.create_and_place_table(2, 1, ["M[X]", "D[X]"], ["Values"])
-
-    #     data = [
-    #         [f"{self._normal.M(): .3f}"],
-    #         [f"{self._normal.D(): .3f}"]
-    #     ]
-    #     self._table.set_data(data=data)
-
-    # def __draw_normal_data(self):
-    #     """
-    #     Метод выводит данные
-    #     """
-    #     self.__draw_normal_distribution_graphs()
-    #     self.__draw_normal_expectation_and_variance()
-
-    # def __draw_selected_data(self):
-    #     """
-    #     Метод для отображения данных для выбранного закона распределения
-    #     """
-
-    #     distribution_type = self._var_choice_distribution_type.get()
-
-    #     match distribution_type:
-    #         case self._uniform_distribution:
-    #             self.__draw_uniform_data()
-    #         case self._erlang_distribution:
-    #             self.__draw_erlang_data()
-    #         case self._poisson_distribution:
-    #             self.__draw_poissom_data()
-    #         case self._exponential_distribution:
-    #             self.__draw_exponential_data()
-    #         case self._normal_distribution:
-    #             self.__draw_normal_data()
-    #         case _:
-    #             messagebox.showwarning(
-    #                 "Ошибка!",
-    #                 "Выбран неизвестный закон распределения!"
-    #             )
+
+    def __create_uniform_generator(self):
+        """
+        Метод создает генератор с равномерным распределением
+        """
+        params = self.__get_uniform_a_b(
+            self._frame_generator_distribution_params
+        )
+        if params is None:
+            return
+
+        self._uniform.set_params(*params)
+
+        return Generator(self._uniform)
+
+    def __create_erlang_generator(self):
+        """
+        Метод создает генератор с распределением Эрланга
+        """
+        params = self.__get_erlang_k_lamb(
+            self._frame_generator_distribution_params
+        )
+        if params is None:
+            return
+
+        self._erlang.set_params(*params)
+
+        return Generator(self._erlang)
+
+    def __create_poisson_generator(self):
+        """
+        Метод создает генератор с распределением Пуассона
+        """
+        params = self.__get_poisson_lamb(
+            self._frame_generator_distribution_params
+        )
+        if params is None:
+            return
+
+        self._poisson.set_lambda(params)
+
+        return Generator(self._poisson)
+
+    def __create_exponential_generator(self):
+        """
+        Метод создает генератор с экспоненциальным распределением
+        """
+        params = self.__get_exponential_lamb(
+            self._frame_generator_distribution_params
+        )
+        if params is None:
+            return
+
+        self._exponential.set_lambda(params)
+
+        return Generator(self._exponential)
+
+    def __create_normal_generator(self):
+        """
+        Метод создает генератор с нормальным распределением
+        """
+        params = self.__get_normal_mu_sigma(
+            self._frame_generator_distribution_params
+        )
+        if params is None:
+            return
+
+        self._normal.set_params(*params)
+
+        return Generator(self._normal)
+
+    def __create_generator(self):
+        """
+        Метод создает генератор заявок
+        """
+
+        generator = None
+
+        generator_distribution_type = self._var_choose_generator_distribution_type.get()
+
+        match generator_distribution_type:
+            case self._uniform_distribution:
+                generator = self.__create_uniform_generator()
+            case self._erlang_distribution:
+                generator = self.__create_erlang_generator()
+            case self._poisson_distribution:
+                generator = self.__create_poisson_generator()
+            case self._exponential_distribution:
+                generator = self.__create_exponential_generator()
+            case self._normal_distribution:
+                generator = self.__create_normal_generator()
+            case _:
+                messagebox.showwarning(
+                    "Ошибка!",
+                    "Выбран неизвестный закон распределения!"
+                )
+
+        if not generator:
+            messagebox.showwarning(
+                "Ошибка!",
+                "Генератор заявок не был успешно создан!"
+            )
+
+        return generator
+
+    def __create_uniform_server(self):
+        """
+        Метод создает ОА с равномерным распределением
+        """
+        params = self.__get_uniform_a_b(
+            self._frame_server_distribution_params
+        )
+        if params is None:
+            return
+
+        self._uniform.set_params(*params)
+
+        return Server(self._uniform)
+
+    def __create_erlang_server(self):
+        """
+        Метод создает ОА с распределением Эрланга
+        """
+        params = self.__get_erlang_k_lamb(
+            self._frame_server_distribution_params
+        )
+        if params is None:
+            return
+
+        self._erlang.set_params(*params)
+
+        return Server(self._erlang)
+
+    def __create_poisson_server(self):
+        """
+        Метод создает ОА с распределением Пуассона
+        """
+        params = self.__get_poisson_lamb(
+            self._frame_server_distribution_params
+        )
+        if params is None:
+            return
+
+        self._poisson.set_lambda(params)
+
+        return Server(self._poisson)
+
+    def __create_exponential_server(self):
+        """
+        Метод создает ОА с экспоненциальным распределением
+        """
+        params = self.__get_exponential_lamb(
+            self._frame_server_distribution_params
+        )
+        if params is None:
+            return
+
+        self._exponential.set_lambda(params)
+
+        return Server(self._exponential)
+
+    def __create_normal_server(self):
+        """
+        Метод создает ОА с нормальным распределением
+        """
+        params = self.__get_normal_mu_sigma(
+            self._frame_server_distribution_params
+        )
+        if params is None:
+            return
+
+        self._normal.set_params(*params)
+
+        return Server(self._normal)
+
+    def __create_server(self):
+        """
+        Метод создает ОА для заявок
+        """
+
+        server = None
+
+        server_distribution_type = self._var_choose_server_distribution_type.get()
+
+        match server_distribution_type:
+            case self._uniform_distribution:
+                server = self.__create_uniform_server()
+            case self._erlang_distribution:
+                server = self.__create_erlang_server()
+            case self._poisson_distribution:
+                server = self.__create_poisson_server()
+            case self._exponential_distribution:
+                server = self.__create_exponential_server()
+            case self._normal_distribution:
+                server = self.__create_normal_server()
+            case _:
+                messagebox.showwarning(
+                    "Ошибка!",
+                    "Выбран неизвестный закон распределения!"
+                )
+
+        if not server:
+            messagebox.showwarning(
+                "Ошибка!",
+                "ОА для заявок не был успешно создан!"
+            )
+
+        return server
+
+    def __get_count_tasks(self):
+        """
+        Метод позволяет получить необходимое для обслуживания количество заявок
+        """
+        values = self._frame_count_tasks.get_values()
+        count_tasks = values["Число заявок"]
+
+        if not self.__is_number(count_tasks):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести целое число --- количество заявок на обслуживание"
+            )
+            return
+
+        _count_tasks = 0
+
+        if checks.check_int(count_tasks):
+            _count_tasks = int(count_tasks)
+
+        if (_count_tasks <= 0):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Количество заявок --- целое неотрицательное число"
+            )
+            return
+
+        return _count_tasks
+
+    def __get_repeat_percent(self):
+        """
+        Метод позволяет получить процент заявок, что будет возвращены в генератор
+        """
+        values = self._frame_queue_system_params.get_values()
+        repeat_percent = values["Процент возврата"]
+
+        if not self.__is_number(repeat_percent):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести число --- процент заявок, что будут обработаны повторно"
+            )
+            return
+
+        _repeat_percent = 0
+
+        if checks.check_int(repeat_percent):
+            _repeat_percent = int(repeat_percent)
+        else:
+            _repeat_percent = float(repeat_percent)
+
+        if (_repeat_percent < 0 or _repeat_percent > 100):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Процент возврата --- неотрицательное число от 0 до 100"
+            )
+            return
+
+        return _repeat_percent
+
+    def __get_queue_system_type(self):
+        """
+        Метод позволяет получить данные о проценте возвращенных на обработку заявок, если такой тип СМО был выбран
+        """
+        repeat_percent = None
+
+        queue_system_type = self._var_choose_queue_system_type.get()
+
+        match queue_system_type:
+            case self._with_feedback:
+                repeat_percent = self.__get_repeat_percent()
+            case self._without_feedback:
+                pass
+            case _:
+                messagebox.showwarning(
+                    "Ошибка!",
+                    "Выбран неизвестный закон распределения!"
+                )
+
+        if not repeat_percent:
+            repeat_percent = 0
+
+        return repeat_percent
+
+    def __get_delta_t(self):
+        """
+        Метод получает параметр λ распределения Пуассона
+        """
+        values = self._frame_time_advance_params.get_values()
+        delta_t = values["Δt"]
+
+        if not self.__is_number(delta_t):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести параметр Δt"
+            )
+            return
+
+        _delta_t = 0
+
+        if checks.check_int(delta_t):
+            _delta_t = int(delta_t)
+        else:
+            _delta_t = float(delta_t)
+
+        if (_delta_t <= 0):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Δt --- неотрицательное число"
+            )
+            return
+
+        return _delta_t
+
+    def __simutale_with_event_approach(self):
+        """
+        Метод для молирования с помощью событийного принципа
+        """
+
+        generator = self.__create_generator()
+        if not generator:
+            return
+
+        server = self.__create_server()
+        if not server:
+            return
+
+        buffer_memory = BufferMemory()
+
+        count_tasks = self.__get_count_tasks()
+        if not count_tasks:
+            return
+
+        repeat_percent = self.__get_queue_system_type()
+
+        event_approach = EventApproach(
+            generator, buffer_memory, server, count_tasks, repeat_percent
+        )
+
+        return event_approach.run()
+
+    def __simutale_with_delta_t_approach(self):
+        """
+        Метод для молирования с помощью принципа Δt
+        """
+
+        generator = self.__create_generator()
+        if not generator:
+            return
+
+        server = self.__create_server()
+        if not server:
+            return
+
+        buffer_memory = BufferMemory()
+
+        count_tasks = self.__get_count_tasks()
+        if not count_tasks:
+            return
+
+        repeat_percent = self.__get_queue_system_type()
+
+        delta_t = self.__get_delta_t()
+        if not delta_t:
+            return
+
+        delta_t_approach = DeltaTApproach(
+            generator, buffer_memory, server, delta_t, count_tasks, repeat_percent
+        )
+
+        return delta_t_approach.run()
+
+    def __run_simulation(self):
+        """
+        Метод для проведения моделирования
+        """
+
+        server = None
+
+        time_advance_alg = self._var_choose_time_advance_alg.get()
+
+        queue_len = 0
+
+        match time_advance_alg:
+            case self._event_approach:
+                queue_len = self.__simutale_with_event_approach()
+            case self._delta_t_approach:
+                queue_len = self.__simutale_with_delta_t_approach()
+            case _:
+                messagebox.showwarning(
+                    "Ошибка!",
+                    "Выбран неизвестный алгоритм протяжки модельного времени!"
+                )
+
+        if queue_len is None:
+            return
+        
+        match time_advance_alg:
+            case self._event_approach:
+                self._table.create_and_place_table(1, 1, ["Событийный принцип"], [
+                                                   "Оптимальная длина очереди"])
+            case self._delta_t_approach:
+                self._table.create_and_place_table(1, 1, ["Принцип Δt"], [
+                                                   "Оптимальная длина очереди"])
+            case _:
+                messagebox.showwarning(
+                    "Ошибка!",
+                    "Выбран неизвестный алгоритм протяжки модельного времени!"
+                )
+                
+        self._table.set_data([[f"{queue_len}"]])
+
+        return server
+
+    def __is_number(self, x: str) -> bool:
+        """
+        Метод проверка введенного значения на число
+        """
+        if checks.check_int(x) or checks.check_float(x):
+            return True
+
+        return False
+
+    def __get_uniform_a_b(self, frame: DistributionParamsFrame):
+        """
+        Метод получает параметры a и b равномерного распределения
+        """
+        values = frame.get_values()
+        a = values["a"]
+        b = values["b"]
+
+        if not self.__is_number(a) or not self.__is_number(b):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести параметры a и b равномерного распределения"
+            )
+            return
+
+        _a, _b = 0, 0
+
+        if checks.check_int(a):
+            _a = int(a)
+        else:
+            _a = float(a)
+
+        if checks.check_float(b):
+            _b = int(b)
+        else:
+            _b = float(b)
+
+        if (_a >= _b):
+            messagebox.showwarning(
+                "Ошибка!",
+                "a <= b"
+            )
+            return
+
+        return _a, _b
+
+    def __get_erlang_k_lamb(self, frame: DistributionParamsFrame):
+        """
+        Метод получает параметры k и λ распределения Эрланга
+        """
+        values = frame.get_values()
+        k = values["k"]
+        lamb = values["λ"]
+
+        if not self.__is_number(k) or not self.__is_number(lamb):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести параметры k и λ распределения Эрланга"
+            )
+            return
+
+        _k, _lamb = 0, 0
+
+        if checks.check_int(k):
+            _k = int(k)
+        else:
+            messagebox.showerror(
+                "Ошибка!",
+                "k - целое число"
+            )
+            return
+
+        if checks.check_float(lamb):
+            _lamb = int(lamb)
+        else:
+            _lamb = float(lamb)
+
+        if (_lamb <= 0):
+            messagebox.showwarning(
+                "Ошибка!",
+                "λ > 0"
+            )
+            return
+
+        return _k, _lamb
+
+    def __get_poisson_lamb(self, frame: DistributionParamsFrame):
+        """
+        Метод получает параметр λ распределения Пуассона
+        """
+        values = frame.get_values()
+        lamb = values["λ"]
+
+        if not self.__is_number(lamb):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести параметр λ распределения Пуассона"
+            )
+            return
+
+        _lamb = 0
+
+        if checks.check_int(lamb):
+            _lamb = int(lamb)
+        else:
+            _lamb = float(lamb)
+
+        if (_lamb <= 0):
+            messagebox.showwarning(
+                "Ошибка!",
+                "λ > 0"
+            )
+            return
+
+        return _lamb
+
+    def __get_exponential_lamb(self, frame: DistributionParamsFrame):
+        """
+        Метод получает параметр λ экспоненциального распределения
+        """
+        values = frame.get_values()
+        lamb = values["λ"]
+
+        if not self.__is_number(lamb):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести параметр λ экспоненциального распределения"
+            )
+            return
+
+        _lamb = 0
+
+        if checks.check_int(lamb):
+            _lamb = int(lamb)
+        else:
+            _lamb = float(lamb)
+
+        if (_lamb <= 0):
+            messagebox.showwarning(
+                "Ошибка!",
+                "λ > 0"
+            )
+            return
+
+        return _lamb
+
+    def __get_normal_mu_sigma(self, frame: DistributionParamsFrame):
+        """
+        Метод получает параметры μ и σ нормального распределения
+        """
+        values = frame.get_values()
+        mu = values["μ"]
+        sigma = values["σ"]
+
+        if not self.__is_number(mu) or not self.__is_number(sigma):
+            messagebox.showwarning(
+                "Ошибка!",
+                "Необходимо ввести параметры μ и σ нормального распределения"
+            )
+            return
+
+        _mu, _sigma = 0, 0
+
+        if checks.check_int(mu):
+            _mu = int(mu)
+        else:
+            _mu = float(mu)
+
+        if checks.check_float(sigma):
+            _sigma = int(sigma)
+        else:
+            _sigma = float(sigma)
+
+        if (_sigma <= 0):
+            messagebox.showwarning(
+                "Ошибка!",
+                "σ > 0"
+            )
+            return
+
+        return _mu, _sigma

@@ -27,7 +27,7 @@ class Table(tk.Frame):
             text=text,
             font=(cfg.ConfigGUI.FONT, 15, cfg.ConfigGUI.FONT_STYLE),
             background="#b0b0b0",
-            width=8
+            width=25
         )
 
     def __create_headers(self, cnt_rows: int, cnt_cols: int, row_headers: list, col_headers: list):
@@ -58,7 +58,7 @@ class Table(tk.Frame):
                     self,
                     relief=tk.SUNKEN,
                     justify=tk.CENTER,
-                    width=8,  # in symbols
+                    width=25,  # in symbols
                     borderwidth=3,
                     highlightbackground="#b0b0b0",
                     highlightcolor="#b0b0b0",
