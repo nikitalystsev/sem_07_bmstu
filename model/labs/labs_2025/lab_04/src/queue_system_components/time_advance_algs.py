@@ -4,6 +4,8 @@ from generator import Generator
 from buffer_memory import BufferMemory
 from server import Server
 
+import random
+
 
 class SBS:
     """
@@ -38,7 +40,8 @@ class EventApproach:
         generator: Generator,
         buffer_memory: BufferMemory,
         server: Server,
-        count_tasks: int
+        count_tasks: int,
+        repeat_percent: int | float
     ) -> None:
         """
         Инициализация атрибутов класса
@@ -49,6 +52,9 @@ class EventApproach:
 
         self._count_tasks = count_tasks
         self._sbs: SBS = SBS()  # список будущих событий
+
+        # процент заявок, что будут повторно обработаны
+        self._repeat_percent = repeat_percent
 
     def run(self):
         """
@@ -81,6 +87,10 @@ class EventApproach:
                 # устанавливаем флаг что свободен
                 self._server.set_state("free")
 
+                # некоторый процент заявок снова пойдет на вход
+                if random.randint(1, 100) < self._repeat_percent:
+                    self._buffer_memory.write_request(curr_event.get_time())
+
                 count_tasks_processed += 1  # заявка была обработана
 
             if self._server.is_free():  # если ОА свободен
@@ -111,7 +121,8 @@ class EventApproach:
             buffer_memory: BufferMemory,
             server: Server,
             delta_t: int | float,
-            count_tasks: int
+            count_tasks: int,
+            repeat_percent: int | float,
         ) -> None:
             """
             Инициализация атрибутов класса
@@ -122,6 +133,9 @@ class EventApproach:
 
             self._count_tasks = count_tasks
             self._delta_t = delta_t
+
+            # процент заявок, что будут повторно обработаны
+            self._repeat_percent = repeat_percent
 
         def run(self):
             """
@@ -153,6 +167,10 @@ class EventApproach:
 
                 if 0 < server_time < curr_time:  # если текущее время больше чем время освобождения ОА после обработки очередной заявки
                     self._server.set_state("free")  # ОА стал свободным
+
+                    # некоторый процент заявок снова пойдет на вход
+                    if random.randint(1, 100) < self._repeat_percent:
+                        self._buffer_memory.write_request(0)
 
                     count_tasks_processed += 1
 
