@@ -1,5 +1,5 @@
 
-from queue_system_components.event import Event, EventType
+from queue_system_components.event import Event, SERVER_EVENT, GENERATOR_EVENT
 from queue_system_components.generator import Generator
 from queue_system_components.buffer_memory import BufferMemory
 from queue_system_components.server import Server
@@ -13,7 +13,11 @@ class SBS:
     """
 
     def __init__(self) -> None:
-        self._sbs: list[Event] = list()
+        """
+        Инициализация атрибутов класса
+        """
+
+        self._sbs: list[Event] = list()  # собственно список будущих событий
 
     def add_event(self, event: Event):
         """
@@ -24,10 +28,16 @@ class SBS:
 
     def get_event(self):
         """
-        Вытаскивает событие с милимальным временем из списка будущих событий
+        Вытаскивает событие с минимальным временем из списка будущих событий
         """
 
         return self._sbs.pop(0)
+
+    def clean(self):
+        """
+        Метод очищает список будущих событий
+        """
+        self._sbs.clear()
 
 
 class EventApproach:
@@ -37,9 +47,9 @@ class EventApproach:
 
     def __init__(
         self,
-        generator: Generator,
-        buffer_memory: BufferMemory,
-        server: Server,
+        generator: Generator,  # генератор
+        buffer_memory: BufferMemory,  # буфферная память
+        server: Server,  # обслуживающий аппарат
         count_tasks: int,
         repeat_percent: int | float
     ) -> None:
@@ -50,59 +60,70 @@ class EventApproach:
         self._buffer_memory = buffer_memory
         self._server = server
 
-        self._count_tasks = count_tasks
+        self._count_tasks = count_tasks  # число заявок, которые нужно промоделировать
         self._sbs: SBS = SBS()  # список будущих событий
 
         # процент заявок, что будут повторно обработаны
         self._repeat_percent = repeat_percent
 
+    def __prepare(self):
+        """
+        Подготовительные операции перед началом моделирования
+        """
+        self._sbs.clean()  # очищаем список будущих событий
+
+        # генератор свободен (моделирование еще не началось)
+        self._server.set_state("free")
+
+        start_generator_event = Event(  # событие --- момент появления первой заявки (сообщения) от генератора (t11)
+            self._generator.gen_next_task_time(), GENERATOR_EVENT
+        )
+        self._sbs.add_event(start_generator_event)
+
     def run(self):
         """
         Метод реализующий событийный принцип
         """
-        count_tasks_processed = 0  # сколько заявок обработано
 
-        start_event = Event(
-            self._generator.gen_next_task_time(), EventType.GENERATOR
-        )
-        self._sbs.add_event(start_event)
+        count_tasks_processed = 0  # число обработанных ОА-м заявок
+
+        self.__prepare()  # выполняем подготовительные действия
 
         while count_tasks_processed < self._count_tasks:  # пока все заявки не будут обработаны
+            # print(f"count_tasks_processed = {count_tasks_processed}")
             # берется минимальное из списка будущих событий
             curr_event = self._sbs.get_event()
 
-            if curr_event.get_event_type() == EventType.GENERATOR:  # появилось сообщение от генератора
+            if curr_event.get_type() == GENERATOR_EVENT:  # появилось сообщение от генератора
+                # реализуем событие --- записали его в буферную память и с пом. генератора получили момент след сообщения
                 self._buffer_memory.write_request(  # кладем его в буферную память
                     curr_event.get_time()
                 )
-                # реализуем событие --- записали его в буферную память (выше) и с пом. генератора получили момент след сообщения
                 next_event = Event(
                     # продвигаем модельное время
-                    curr_event.get_time() + self._generator.gen_next_task_time(), EventType.GENERATOR
+                    curr_event.get_time() + self._generator.gen_next_task_time(), GENERATOR_EVENT
                 )
                 # помещаем новое событие в список будущих событий
                 self._sbs.add_event(next_event)
 
-            if curr_event.get_event_type() == EventType.SERVER:  # ОА обработал заявку, то есть освободился
+            if curr_event.get_type() == SERVER_EVENT:  # ОА обработал заявку, то есть освободился
                 # устанавливаем флаг что свободен
                 self._server.set_state("free")
 
                 # некоторый процент заявок снова пойдет на вход
                 if random.randint(1, 100) < self._repeat_percent:
                     self._buffer_memory.write_request(curr_event.get_time())
-
-                count_tasks_processed += 1  # заявка была обработана
+                else:
+                    count_tasks_processed += 1  # заявка была обработана
 
             if self._server.is_free():  # если ОА свободен
                 # пытаемся считать ранее положенную заявку из буферной памяти
                 is_empty, _ = self._buffer_memory.read_request()
 
-                if is_empty:  # если буферная память пуста --- положить в ОА нечего
-                    pass
-                else:
+                if not is_empty:  # если буферная память пуста --- положить в ОА нечего
                     next_event = Event(
                         # продвигаем модельное время
-                        curr_event.get_time() + self._server.get_process_task_time(), EventType.SERVER
+                        curr_event.get_time() + self._server.get_server_task_time(), SERVER_EVENT
                     )
                     # кладем заявку из буферной памяти в ОА
                     self._sbs.add_event(next_event)
@@ -118,9 +139,9 @@ class DeltaTApproach:
 
     def __init__(
         self,
-        generator: Generator,
-        buffer_memory: BufferMemory,
-        server: Server,
+        generator: Generator,  # генератор
+        buffer_memory: BufferMemory,  # буфферная память
+        server: Server,  # обслуживающий аппарат
         delta_t: int | float,
         count_tasks: int,
         repeat_percent: int | float,
@@ -138,10 +159,6 @@ class DeltaTApproach:
         # процент заявок, что будут повторно обработаны
         self._repeat_percent = repeat_percent
 
-        print(f"self._count_tasks = {self._count_tasks}")
-        print(f"self._delta_t = {self._delta_t}")
-        print(f"self._repeat_percent = {self._repeat_percent}")
-
     def run(self):
         """
         Метод реализующий принцип Δt
@@ -149,51 +166,64 @@ class DeltaTApproach:
         self._server.set_state("free")
         count_tasks_processed = 0  # сколько заявок обработано
 
-        # время освобождения ОА после обработки первой заявки (пока неизвестно)
-        server_time = -1
-
-        # получаем время прихода первой заявки от ИИ
+        # получаем время прихода первой заявки от генератора
         new_task_time = self._generator.gen_next_task_time()
+        prev_task_time = 0
 
-        curr_time = self._delta_t
+        server_task_time = -1
 
-        empty_generated = None
+        curr_time = self._delta_t  # время t + Δt
+
+        all_empty = None
 
         while count_tasks_processed < self._count_tasks:  # пока все заявки не будут обработаны
-            # print("[+] loop...")
-            # print(f"count_tasks_processed = {count_tasks_processed}")
-            if curr_time > new_task_time:  # если текущее время больше чем время появления новой заявки
-                if self._server.is_free() and self._buffer_memory.is_empty():
-                    empty_generated = True
-                # кладем заявку с какими либо данными в буфферную память
-                self._buffer_memory.write_request(curr_time)
+            # последовательный анализ каждого блока системы в момент времени t + Δt (curr_time)
+            # по заданному состоянию блоков в момент времени t
+
+            # анализ генератора
+            # проверяем в цикле, т.к. за один шаг Δt может прийти несколько заявок
+            if curr_time > new_task_time:
+                if self._server.is_free() and self._buffer_memory.is_empty():  # если система пустая
+                    all_empty = True
+                # заявка должна быть в буферной памяти
+                self._buffer_memory.write_request(new_task_time)
                 # нужно сгенерить время прихода след заявки
                 prev_task_time = new_task_time
                 new_task_time = prev_task_time + self._generator.gen_next_task_time()
 
-            if 0 < server_time < curr_time:  # если текущее время больше чем время освобождения ОА после обработки очередной заявки
-                self._server.set_state("free")  # ОА стал свободным
+            # анализ ОА
+            # если текущее время больше чем время освобождения ОА после обработки очередной заявки
+            if curr_time > server_task_time and server_task_time > 0:
+                self._server.set_state("free")  # ОА должен быть свободным
 
                 # некоторый процент заявок снова пойдет на вход
                 if random.randint(0, 100) < self._repeat_percent:
                     self._buffer_memory.write_request(0)
-
-                count_tasks_processed += 1
+                else:
+                    count_tasks_processed += 1
+            else:  # ниче не делаем
+                pass
 
             if self._server.is_free():  # если ОА свободен
-                # пытаемся считать ранее положенную заявку из буферной памяти
+                # должны пытаться считать ранее положенную заявку из буферной памяти
                 is_empty, _ = self._buffer_memory.read_request()
 
-                if is_empty:  # если буферная память пуста --- положить в ОА нечего
-                    server_time = -1
-                else:
-                    server_time = (prev_task_time if empty_generated else server_time) + \
-                        self._server.get_process_task_time()
+                if not is_empty:  # если буферная память пуста --- положить в ОА нечего
+                    duration = self._server.get_server_task_time()
+
+                    # если ОА был занят, то в момент когда он стал свободен и есть новая заявка на обработку,
+                    # протяжка модельного времени обслуживания идет исходя из предыдущего времени освобождения ОА
+                    # если ОА был свободен, то он и сейчас свободен и есть новая заявка на обработку,
+                    # протяжка модельного времени обслуживания идет исходя из времени поступления заявки в буферную память (очередь)
+                    started_time = prev_task_time if all_empty else server_task_time
+                    server_task_time = started_time + duration
 
                     # ОА обрабатывает заявку
                     self._server.set_state("busy")
+                else:
+                    server_task_time = -1
 
-            empty_generated = False
+            all_empty = False
             curr_time += self._delta_t  # продвигаем модельное время
 
         return self._buffer_memory.get_max_queue_len()

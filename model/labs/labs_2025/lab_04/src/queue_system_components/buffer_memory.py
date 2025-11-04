@@ -28,7 +28,7 @@ class BufferMemory:
         """
         if not self.is_empty():
             self._cur_len -= 1
-            return False, self._p.pop()
+            return False, self._p.pop(0)
 
         self._cur_len = 0
 

@@ -66,6 +66,9 @@ class MyWindow(tk.Tk):
         self._frame_time_advance_params.config(background="#3D517F")
         self._frame_time_advance_params.grid(
             row=13, column=0, columnspan=4, sticky='wens')
+        self._frame_time_advance_params.set_parameters(parameters=[
+            ("Δt"),
+        ])
 
         self._frame_queue_system_params = QueueSystemParamsFrame(
             self._frame_widgets)
@@ -77,7 +80,7 @@ class MyWindow(tk.Tk):
             self._frame_widgets)
         self._frame_count_tasks.config(background="#3D517F")
         self._frame_count_tasks.grid(
-            row=17, column=0, columnspan=2, sticky='wens', pady=10
+            row=17, column=0, columnspan=4, sticky='wens', pady=10
         )
 
         self._frame_results = self.__create_frame(master=self)
@@ -260,9 +263,6 @@ class MyWindow(tk.Tk):
         ######################################################################
 
         # time advance
-        self._var_choose_time_advance_alg = tk.StringVar(
-            value=self._delta_t_approach
-        )
 
         self._lbl_time_advance = self.__create_label(
             master=self._frame_widgets, text="Протяжка модельного времени"
@@ -274,37 +274,6 @@ class MyWindow(tk.Tk):
             row=10, column=0, columnspan=4, sticky='wens', padx=10, pady=15
         )
 
-        self._lbl_time_advance_alg = self.__create_label(
-            master=self._frame_widgets, text="Алгоритм протяжки модельного времени: "
-        )
-        self._lbl_time_advance_alg.config(
-            background="#3D517F",
-            font=(self.cfgWin.FONT, 18, self.cfgWin.FONT_STYLE),
-            anchor="w",
-        )
-        self._lbl_time_advance_alg.grid(
-            row=11, column=0, columnspan=4, sticky='wens', padx=10, pady=5,
-        )
-
-        self._combobox_time_advance_alg = ttk.Combobox(
-            master=self._frame_widgets,
-            values=self._time_advance_algs,
-            style="Custom.TCombobox",
-            state="readonly",
-            font=(self.cfgWin.FONT, 18, self.cfgWin.FONT_STYLE),
-            textvariable=self._var_choose_time_advance_alg
-        )
-        # default time advance params
-        self._frame_time_advance_params.set_parameters(
-            parameters=[("Δt")]
-        )
-
-        self._combobox_time_advance_alg.bind(
-            "<<ComboboxSelected>>", self._pack_chosen_time_advance_params
-        )
-        self._combobox_time_advance_alg.grid(
-            row=12, column=0, columnspan=4, sticky='wens', padx=10, pady=5
-        )
         ######################################################################
 
         # type of Q-system
@@ -367,7 +336,7 @@ class MyWindow(tk.Tk):
             command=self.__run_simulation
         )
         self._btn_calc.grid(
-            row=17, column=2, columnspan=2,
+            row=18, column=0, columnspan=4,
             sticky='wens', padx=10, pady=15
         )
 
@@ -529,22 +498,12 @@ class MyWindow(tk.Tk):
         ]
         frame.set_parameters(parameters=params)
 
-    def __pack_delta_t_params(self) -> None:
-        """
-        Метод упаковывает параметры принципа Δt
-        """
-
-        params = [
-            ("Δt"),
-        ]
-        self._frame_time_advance_params.set_parameters(parameters=params)
-
     def __pack_queue_system_params(self):
         """
         Метод упаковывает поле ввода для процента возвратов
         """
         params = [
-            ("Процент возврата:"),
+            ("Процент возврата"),
         ]
         self._frame_queue_system_params.set_parameters(parameters=params)
 
@@ -598,23 +557,6 @@ class MyWindow(tk.Tk):
             case self._normal_distribution:
                 self.__pack_normal_params(
                     self._frame_server_distribution_params)
-            case _:
-                messagebox.showwarning(
-                    "Ошибка!",
-                    "Выбран неизвестный закон распределения!"
-                )
-
-    def _pack_chosen_time_advance_params(self, event):
-        """
-        Метод выводит поля для ввода параметров алгоритмов протяжка модельного времени
-        """
-        time_advance_alg = self._var_choose_time_advance_alg.get()
-
-        match time_advance_alg:
-            case self._delta_t_approach:
-                self.__pack_delta_t_params()
-            case self._event_approach:
-                pass
             case _:
                 messagebox.showwarning(
                     "Ошибка!",
@@ -1021,42 +963,18 @@ class MyWindow(tk.Tk):
         Метод для проведения моделирования
         """
 
-        server = None
+        queue_len_event_approach = self.__simutale_with_event_approach()
+        queue_len_delta_t_approach = self.__simutale_with_delta_t_approach()
 
-        time_advance_alg = self._var_choose_time_advance_alg.get()
+        self._table.create_and_place_table(2, 1, ["Событийный принцип", "Принцип Δt"], [
+            "Оптимальная длина очереди"])
 
-        queue_len = 0
+        data = [
+            [f"{queue_len_event_approach}"],
+            [f"{queue_len_delta_t_approach}"],
+        ]
 
-        match time_advance_alg:
-            case self._event_approach:
-                queue_len = self.__simutale_with_event_approach()
-            case self._delta_t_approach:
-                queue_len = self.__simutale_with_delta_t_approach()
-            case _:
-                messagebox.showwarning(
-                    "Ошибка!",
-                    "Выбран неизвестный алгоритм протяжки модельного времени!"
-                )
-
-        if queue_len is None:
-            return
-
-        match time_advance_alg:
-            case self._event_approach:
-                self._table.create_and_place_table(1, 1, ["Событийный принцип"], [
-                                                   "Оптимальная длина очереди"])
-            case self._delta_t_approach:
-                self._table.create_and_place_table(1, 1, ["Принцип Δt"], [
-                                                   "Оптимальная длина очереди"])
-            case _:
-                messagebox.showwarning(
-                    "Ошибка!",
-                    "Выбран неизвестный алгоритм протяжки модельного времени!"
-                )
-
-        self._table.set_data([[f"{queue_len}"]])
-
-        return server
+        self._table.set_data(data=data)
 
     def __is_number(self, x: str) -> bool:
         """

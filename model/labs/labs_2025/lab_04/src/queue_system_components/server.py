@@ -16,7 +16,7 @@ class Server:
         self._distribution = distribution
         self._is_free = True  # свободен ли
 
-    def get_process_task_time(self):
+    def get_server_task_time(self):
         """
         Метод позволяет получить время следующего освобождения ОА
         """
