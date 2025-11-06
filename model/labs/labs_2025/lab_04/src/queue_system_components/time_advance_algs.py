@@ -85,12 +85,13 @@ class EventApproach:
         Метод реализующий событийный принцип
         """
 
+        print(f"EventApproach.run() is called")
         count_tasks_processed = 0  # число обработанных ОА-м заявок
 
         self.__prepare()  # выполняем подготовительные действия
 
         while count_tasks_processed < self._count_tasks:  # пока все заявки не будут обработаны
-            # print(f"count_tasks_processed = {count_tasks_processed}")
+            print(f"count_tasks_processed = {count_tasks_processed}")
             # берется минимальное из списка будущих событий
             curr_event = self._sbs.get_event()
 
@@ -129,6 +130,8 @@ class EventApproach:
                     self._sbs.add_event(next_event)
                     self._server.set_state("busy")  # ОА обрабатывает заявку
 
+        print(f"EventApproach.run() is finished")
+        
         return self._buffer_memory.get_max_queue_len()
 
 
@@ -174,8 +177,11 @@ class DeltaTApproach:
 
         curr_time = self._delta_t  # время t + Δt
 
-        all_empty = None
+        all_empty = None  # флаг, означающий пустоту системы
 
+        
+        print(f"DeltaTApproach.run() is called")
+        
         while count_tasks_processed < self._count_tasks:  # пока все заявки не будут обработаны
             # последовательный анализ каждого блока системы в момент времени t + Δt (curr_time)
             # по заданному состоянию блоков в момент времени t
@@ -192,7 +198,7 @@ class DeltaTApproach:
                 new_task_time = prev_task_time + self._generator.gen_next_task_time()
 
             # анализ ОА
-            # если текущее время больше чем время освобождения ОА после обработки очередной заявки
+            # если текущее время больше чем время освобождения ОА после обработки очередной заявки и система не пустая
             if curr_time > server_task_time and server_task_time > 0:
                 self._server.set_state("free")  # ОА должен быть свободным
 
@@ -226,4 +232,6 @@ class DeltaTApproach:
             all_empty = False
             curr_time += self._delta_t  # продвигаем модельное время
 
+        print(f"DeltaTApproach.run() is finished")
+        
         return self._buffer_memory.get_max_queue_len()
