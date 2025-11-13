@@ -1,0 +1,20 @@
+\chapter{Распределение Пуассона}
+
+Говорят, что случайная величина $X$ имеет \textit{распределение Пуассона} с параметром $\lambda > 0$, если $X$ принимает значения $0, 1, 2, \dots$ с вероятностями:
+
+\begin{equation}
+	P\{X=k\} = \frac{\lambda^k}{k!} e^{-\lambda}, k \in \mathbb{R}_0.
+\end{equation}
+
+При этом функция распределения~$F(x)$ равна:
+
+\begin{equation}
+	F(x) =
+	\begin{cases}
+		0,  & \quad x < a;\\
+		\displaystyle\frac{x - a}{b - a}, & x \in [a, b];\\
+		1,  & \quad x > b.
+	\end{cases}
+\end{equation}
+
+Обозначение: $X \sim R[a, b]$.
