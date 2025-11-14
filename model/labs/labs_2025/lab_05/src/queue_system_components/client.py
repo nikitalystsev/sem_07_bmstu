@@ -1,41 +1,25 @@
-import random
+from queue_system_components.distributions import UniformDistribution, ErlangDistribution, PoissonDistribution, ExponentialDistribution, NormalDistribution
 
 
 class Client:
     """
-    Класс реализющий клиента
+    Класс реализющий клиента (он же генератор)
     """
 
-    def __init__(self, a: int | float, b: int | float) -> None:
+    def __init__(
+        self,
+        disctribution: UniformDistribution | ErlangDistribution | PoissonDistribution | ExponentialDistribution | NormalDistribution
+    ) -> None:
         """
         Инициализация атрибутов класса
         Если клиент приходят в ИЦ через интервал времени 10 +- 5 минут, то это равномерное распределение R[5,15]
         """
-        self._a = a
-        self._b = b
 
-    def t_i(self):
+        self._distribution = disctribution
+
+    def gen_next_task_time(self):
         """
-        Метод возвращает момент времени t_i
+        Метод возвращает псевдослучайное число -- время после времени предыдущей заявки, через которое появится новая заявка
         """
 
-        return self._a + (self._b - self._a) * random.random()
-
-    def set_params(self, a: int | float, b: int | float) -> None:
-        """
-        Метод устанавливает значения параметров распределения
-        """
-        self._a = a
-        self._b = b
-
-    def get_a(self):
-        """
-        Геттер
-        """
-        return self._a
-
-    def get_b(self):
-        """
-        Геттер
-        """
-        return self._b
+        return self._distribution.t_i()

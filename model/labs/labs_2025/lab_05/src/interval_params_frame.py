@@ -9,6 +9,16 @@ class IntervalParamsFrame(tk.Frame):
 
         self._widgets = []  # список всех созданных виджетов
 
+    def set_data(self, data: list[int | float]):
+        """
+        Мето для вставки данных по умолчанию в поля ввода
+        """
+        if not self._widgets:
+            return
+
+        self._widgets[0].insert(0, f"{data[0]}")
+        self._widgets[2].insert(0, f"{data[1]}")
+
     def create_widgets(self):
         """
         Создаёт все лейблы и поля ввода на фрейме.
@@ -20,7 +30,8 @@ class IntervalParamsFrame(tk.Frame):
             font=(ConfigGUI.FONT, 18, ConfigGUI.FONT_STYLE),
             borderwidth=3,
             highlightbackground="#b0b0b0",
-            highlightcolor="#b0b0b0"
+            highlightcolor="#b0b0b0",
+            justify="center",
         )
         entry_interval1.pack(side=tk.LEFT)
 
@@ -38,6 +49,7 @@ class IntervalParamsFrame(tk.Frame):
             borderwidth=3,
             highlightbackground="#b0b0b0",
             highlightcolor="#b0b0b0",
+            justify="center"
         )
         entry_interval2.pack(side=tk.LEFT)
 
@@ -52,6 +64,15 @@ class IntervalParamsFrame(tk.Frame):
         self._widgets.extend(
             [entry_interval1, lbl_plus_minus, entry_interval2, lbl_minutes]
         )
+
+    def get_data(self):
+        """
+        Метод, возвращающий данные
+        """
+        if not self._widgets:
+            return None
+
+        return self._widgets[0].get(), self._widgets[2].get()
 
     def clear(self):
         """

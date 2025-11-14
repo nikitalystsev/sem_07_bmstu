@@ -39,6 +39,7 @@ class Table(tk.Frame):
 
         for i in range(cnt_rows):
             curr_label_row = self.__create_label(row_headers[i])
+            curr_label_row.config(width=0)
             self.list_labels_row.append(curr_label_row)
 
         for i in range(cnt_cols):

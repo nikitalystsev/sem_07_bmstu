@@ -1,5 +1,10 @@
-SERVER_EVENT = 1
-GENERATOR_EVENT = 2
+# три типа событий в информационном центре
+CLIENT_EVENT = 1
+OPERATOR1_EVENT = 2
+OPERATOR2_EVENT = 3
+OPERATOR3_EVENT = 4
+COMPUTER1_EVENT = 5
+COMPUTER2_EVENT = 6
 
 
 class Event:
@@ -22,6 +27,6 @@ class Event:
 
     def get_type(self):
         """
-        Метод возвращает тип события (от генератора ли от ОА)
+        Метод возвращает тип события (от клиента, оператора или от компьютера)
         """
         return self._type

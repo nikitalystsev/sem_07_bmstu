@@ -13,28 +13,28 @@ class Computer:
         """
         self._t = t
 
+        self._is_free = True
+
     def t_i(self):
         """
         Метод возвращает момент времени t_i
         """
 
-        return self._a + (self._b - self._a) * random.random()
+        return self._t
 
-    def set_params(self, a: int | float, b: int | float) -> None:
+    def set_state(self, state: str):
         """
-        Метод устанавливает значения параметров распределения
+        Установка состояния ОА
         """
-        self._a = a
-        self._b = b
+        # print(f"computer.set_state() is called, state that is gonna set = {state}")
+        
+        if state == "free":
+            self._is_free = True
+        else:
+            self._is_free = False
 
-    def get_a(self):
+    def is_free(self) -> bool:
         """
-        Геттер
+        Возвращает состояние ОА
         """
-        return self._a
-
-    def get_b(self):
-        """
-        Геттер
-        """
-        return self._b
+        return self._is_free
